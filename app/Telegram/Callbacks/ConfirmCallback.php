@@ -1,6 +1,6 @@
 <?php
 
-namespace Telegram\Callbacks;
+namespace App\Telegram\Callbacks;
 
 class ConfirmCallback
 {
