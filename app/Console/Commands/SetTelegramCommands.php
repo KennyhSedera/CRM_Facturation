@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use Telegram\Bot\Api;
+
+class SetTelegramCommands extends Command
+{
+    protected $signature = 'telegram:commands:set';
+    protected $description = 'Définit les commandes du bot Telegram (menu)';
+
+    public function handle()
+    {
+        $botToken = config('telegram.bots.mybot.token') ?? env('TELEGRAM_BOT_TOKEN');
+
+        if (!$botToken) {
+            $this->error('❌ TELEGRAM_BOT_TOKEN non défini');
+            return 1;
+        }
+
+        $telegram = new Api($botToken);
+
+        $commands = [
+            [
+                'command' => 'start',
+                'description' => 'Accueil du bot 🚀',
+            ],
+            [
+                'command' => 'help',
+                'description' => 'Aide & guide d’utilisation 🆘',
+            ],
+            [
+                'command' => 'profile',
+                'description' => 'Mon profil 👤',
+            ],
+            [
+                'command' => 'clients',
+                'description' => 'Gestion des clients 👥',
+            ],
+            [
+                'command' => 'ticket',
+                'description' => 'Support & tickets 🎫',
+            ],
+            [
+                'command' => 'subscription',
+                'description' => 'Mon abonnement 💳',
+            ],
+            [
+                'command' => 'createcompany',
+                'description' => 'Créer une entreprise 🏢',
+            ],
+            [
+                'command' => 'cancel',
+                'description' => 'Annuler une action en cours ❌',
+            ],
+        ];
+
+        $telegram->setMyCommands([
+            'commands' => $commands,
+        ]);
+
+        $this->info('✅ Menu des commandes Telegram mis à jour avec succès');
+        return 0;
+    }
+}

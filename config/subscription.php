@@ -1,0 +1,93 @@
+<?php
+
+return [
+    'plans' => [
+        'FREE' => [
+            'name' => 'Gratuit',
+            'icon' => '🆓',
+            'price' => 0,
+            'limits' => [
+                'clients_max' => 3,
+                'quotes_per_month' => 5,
+                'custom_products' => 0,
+                'team_members' => 1,
+                'storage_mb' => 100,
+            ],
+            'features' => [
+                'calculator' => true,
+                'generic_catalog' => true,
+                'pdf_generation' => true,
+                'email_support' => true,
+                'custom_logo' => false,
+                'custom_products' => false,
+                'advanced_stats' => false,
+                'api_access' => false,
+                'priority_support' => false,
+            ],
+        ],
+
+        'PREMIUM' => [
+            'name' => 'Premium',
+            'icon' => '⭐',
+            'price' => 9900,
+            'billing_period' => 'monthly',
+            'limits' => [
+                'clients_max' => null,
+                'quotes_per_month' => null,
+                'custom_products' => null,
+                'team_members' => 5,
+                'storage_mb' => 5000,
+            ],
+            'features' => [
+                'calculator' => true,
+                'generic_catalog' => true,
+                'pdf_generation' => true,
+                'email_support' => true,
+                'custom_logo' => true,
+                'custom_products' => true,
+                'advanced_stats' => true,
+                'multi_currency' => true,
+                'export_data' => true,
+                'whatsapp_support' => true,
+                'api_access' => false,
+                'priority_support' => false,
+                'dedicated_account_manager' => false,
+            ],
+        ],
+
+        'ENTERPRISE' => [
+            'name' => 'Entreprise',
+            'icon' => '🏢',
+            'price' => 14900,
+            'billing_period' => 'custom',
+            'limits' => [
+                'clients_max' => null,
+                'quotes_per_month' => null,
+                'custom_products' => null,
+                'team_members' => null,
+                'storage_mb' => null,
+            ],
+            'features' => [
+                'calculator' => true,
+                'generic_catalog' => true,
+                'pdf_generation' => true,
+                'email_support' => true,
+                'custom_logo' => true,
+                'custom_products' => true,
+                'advanced_stats' => true,
+                'multi_currency' => true,
+                'export_data' => true,
+                'whatsapp_support' => true,
+                'api_access' => true,
+                'priority_support' => true,
+                'dedicated_account_manager' => true,
+                'white_label' => true,
+                'custom_integrations' => true,
+                'sla_guarantee' => true,
+                'training_sessions' => true,
+            ],
+        ],
+    ],
+
+    'currency' => 'FCFA',
+];
