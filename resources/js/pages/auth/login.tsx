@@ -1,6 +1,8 @@
+// resources/js/pages/auth/login.tsx
+
 import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useEffect } from 'react';
 
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -18,14 +20,31 @@ type LoginForm = {
 interface LoginProps {
     status?: string;
     canResetPassword: boolean;
+    email?: string;
+    password?: string;
+    redirect_text?: string;
 }
 
-export default function Login({ status, canResetPassword }: LoginProps) {
+export default function Login({ status, canResetPassword, email, password, redirect_text }: LoginProps) {
     const { data, setData, post, processing, errors, reset, setError } = useForm<Required<LoginForm>>({
-        email: '',
-        password: '',
+        email: email || '',
+        password: password || '',
         remember: false,
     });
+
+    // Pré-remplir les champs si les paramètres URL sont présents
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlEmail = urlParams.get('email');
+        const urlPassword = urlParams.get('password');
+
+        if (urlEmail) {
+            setData('email', urlEmail);
+        }
+        if (urlPassword) {
+            setData('password', urlPassword);
+        }
+    }, []);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -37,15 +56,32 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     return (
         <AuthLayout title="Se connecter avec votre compte" description="">
             <Head title="Log in" />
+
+            {/* Message de redirection si présent */}
+            {redirect_text && (
+                <div className="mb-4 rounded-lg bg-blue-50 p-4 text-sm text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
+                    <p className="font-medium">{redirect_text}</p>
+                    {data.email && (
+                        <p className="mt-1">
+                            Email : <strong>{data.email}</strong>
+                        </p>
+                    )}
+                </div>
+            )}
+
+            {status && (
+                <div className="mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">{status}</div>
+            )}
+
             <form className="flex w-auto flex-col gap-6 rounded-md bg-gray-100 p-8 dark:bg-white/15" onSubmit={submit}>
                 <div className="grid gap-6">
                     <div className="grid gap-2">
                         <TextInput
-                            label="Address email"
+                            label="Adresse email"
                             id="email"
                             type="email"
                             required
-                            autoFocus
+                            autoFocus={!data.email} // Focus seulement si email vide
                             tabIndex={1}
                             autoComplete="email"
                             value={data.email}
@@ -60,7 +96,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         <div className="flex items-center">
                             {canResetPassword && (
                                 <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
-                                    Forgot password?
+                                    Mot de passe oublié ?
                                 </TextLink>
                             )}
                         </div>
@@ -69,11 +105,12 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             id="password"
                             type="password"
                             required
+                            autoFocus={!!data.email} // Focus sur password si email pré-rempli
                             tabIndex={2}
                             autoComplete="current-password"
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
-                            placeholder="Password"
+                            placeholder="Mot de passe"
                             error={errors.password}
                             onFocus={() => setError('password', '')}
                         />
@@ -96,16 +133,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         Se connecter
                     </Button>
                 </div>
-
-                {/* <div className="text-center text-sm text-muted-foreground">
-                    Vous n'avez pas de compte?{' '}
-                    <TextLink href={route('register')} tabIndex={5}>
-                        Register
-                    </TextLink>
-                </div> */}
             </form>
-
-            {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
         </AuthLayout>
     );
 }

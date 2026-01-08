@@ -36,8 +36,9 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Entrées / Sorties',
-        href: '/mvt-article',
+        href: '/mouvements',
         icon: ShoppingCart,
+        roles: ['super_admin', 'admin_company'],
     },
     {
         title: 'Reçus / Factures',

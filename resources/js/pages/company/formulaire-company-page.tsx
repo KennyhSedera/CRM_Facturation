@@ -41,6 +41,12 @@ export default function Create() {
 
     const plan: PlanStatus = new URLSearchParams(url.split('?')[1]).get('plan') as PlanStatus;
 
+    const addOneMonth = (dateString: string): string => {
+        const date = new Date(dateString);
+        date.setMonth(date.getMonth() + 1);
+        return date.toISOString().split('T')[0];
+    };
+
     const { data, setData, post, processing, errors, setError } = useForm({
         company_name: '',
         company_email: '',
@@ -59,7 +65,7 @@ export default function Create() {
         company_tax_number: '',
 
         plan_start_date: new Date().toISOString().split('T')[0],
-        plan_end_date: '',
+        plan_end_date: addOneMonth(new Date().toISOString().split('T')[0]),
 
         is_active: true as boolean,
         company_currency: 'XOF',
@@ -82,15 +88,18 @@ export default function Create() {
         const formData = new FormData();
         Object.keys(data).forEach((key) => {
             const value = data[key as keyof typeof data];
+
             if (key === 'company_logo' && value instanceof File) {
                 formData.append(key, value);
+            } else if (typeof value === 'boolean') {
+                formData.append(key, value ? '1' : '0');
             } else if (value !== null && value !== undefined) {
                 formData.append(key, String(value));
             }
         });
 
         try {
-            const response = await fetch(route('companies.store'), {
+            const response = await fetch('/api/companies', {
                 method: 'POST',
                 body: formData,
                 credentials: 'include',
@@ -103,12 +112,19 @@ export default function Create() {
 
             if (response.ok && result.success) {
                 setSubmitSuccess(result.message || 'Entreprise créée avec succès !');
-                console.log("Données de l'entreprise:", result.data);
-                setTimeout(() => {
-                    window.location.href = route('companies.index');
+
+                setTimeout(async () => {
+                    window.location.href =
+                        '/login?email=' +
+                        data.company_email +
+                        '&password=' +
+                        data.company_name +
+                        '&redirect_url=/dashboard&redirect_text=Veuillez vous connecter avec votre adresse email:';
                 }, 2000);
             } else {
                 if (result.errors) {
+                    console.log(result.errors);
+
                     Object.keys(result.errors).forEach((key) => {
                         setError(key as any, result.errors[key][0]);
                     });
@@ -556,7 +572,11 @@ export default function Create() {
                                                 id="plan_start_date"
                                                 label="Date de début du plan"
                                                 value={data.plan_start_date}
-                                                onChange={(value) => setData('plan_start_date', value)}
+                                                onChange={(value) => (
+                                                    setData('plan_start_date', value),
+                                                    setData('plan_end_date', addOneMonth(value)),
+                                                    setError('plan_start_date', '')
+                                                )}
                                                 error={errors.plan_start_date}
                                                 min={new Date().toISOString().split('T')[0]}
                                                 required

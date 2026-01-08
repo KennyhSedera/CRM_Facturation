@@ -407,7 +407,7 @@ export default function Welcome() {
             </header>
 
             {/* Hero Section */}
-            <section className="relative overflow-hidden px-6 pt-32 pb-20">
+            <section className="3xl:h-auto relative overflow-hidden px-6 pt-32 pb-20 md:h-screen">
                 {/* Background Image with Overlay */}
                 <div className="absolute inset-0 z-0">
                     <img

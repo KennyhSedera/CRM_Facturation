@@ -45,7 +45,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onView, onEdit, onMo
                             </span>
                         {company.company_logo ?
                         <img
-                        src={`/storage/company-logos/${company.company_logo}`}
+                        src={`/storage/${company.company_logo}`}
                         className=' h-16 w-16 rounded-xl'
                         alt="logo entreprise"
                          /> :

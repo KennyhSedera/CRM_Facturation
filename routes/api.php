@@ -38,15 +38,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('quote_items', QuoteItemController::class);
 });
 
-// Route::get("token", function(){
-//     $token = $user->createToken('api-token')->plainTextToken;
-
-//     return response()->json([
-//         'token' => $token
-//     ]);
-
-// });
-
-
-
 Route::get('/pdf', [PdfController::class, 'generate']);

@@ -1,56 +1,136 @@
 <?php
 
-use App\Http\Controllers\StartBotController;
+// use App\Http\Controllers\StartBotController;
+// use Illuminate\Support\Facades\Route;
+// use Inertia\Inertia;
+
+// Route::get('/', function () {
+//     return Inertia::render('welcome');
+// })->name('home');
+
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     Route::get('dashboard', function () {
+//         return Inertia::render('dashboard');
+//     })->name('dashboard');
+// });
+
+// Route::get('/test', [StartBotController::class, 'sendMessage']);
+
+// Route::get('/company', function () {
+//     return Inertia::render('company/formulaire-company-page');
+// })->name('company.form');
+
+// Route::get('/companies', function () {
+//     return Inertia::render('company/company-page');
+// })->name('company.page');
+
+// Route::get('/company/profile', function () {
+//     return Inertia::render('company/company-profile');
+// })->name('company.profile');
+
+// Route::get('/articles', function () {
+//     return Inertia::render('articles/article-page');
+// })->name('article.page');
+
+// Route::get('/catalogues', function () {
+//     return Inertia::render('articles/catalogue-page');
+// })->name('catalogue.page');
+
+// Route::get('/mvt-article', function () {
+//     return Inertia::render('articles/mvt-article-page');
+// })->name('mvt.article.page');
+
+// Route::get('/clients', function () {
+//     return Inertia::render('client/client-page');
+// })->name('client.page');
+
+// Route::get('/quotes', function () {
+//     return Inertia::render('quotes/quote-page');
+// })->name('quote.page');
+
+// Route::get('/users', function () {
+//     return Inertia::render('users/user-page');
+// })->name('users.page');
+
+// require __DIR__ . '/settings.php';
+// require __DIR__ . '/auth.php';
+
+
+
+
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+// ============================================
+// ROUTES PUBLIQUES
+// ============================================
 
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-});
-
-Route::get('/test', [StartBotController::class, 'sendMessage']);
-
 Route::get('/company', function () {
     return Inertia::render('company/formulaire-company-page');
 })->name('company.form');
 
-Route::get('/companies', function () {
-    return Inertia::render('company/company-page');
-})->name('company.page');
+// ============================================
+// ROUTES AUTHENTIFIÉES (tous les utilisateurs)
+// ============================================
 
-Route::get('/company/profile', function () {
-    return Inertia::render('company/company-profile');
-})->name('company.profile');
+Route::middleware(['auth', 'verified'])->group(function () {
 
-Route::get('/articles', function () {
-    return Inertia::render('articles/article-page');
-})->name('article.page');
+    Route::get('dashboard', function () {
+        return Inertia::render('dashboard');
+    })->name('dashboard');
 
-Route::get('/catalogues', function () {
-    return Inertia::render('articles/catalogue-page');
-})->name('catalogue.page');
+    Route::prefix('articles')->name('article.')->group(function () {
+        Route::get('/', function () {
+            return Inertia::render('articles/article-page');
+        })->name('page');
+    });
 
-Route::get('/mvt-article', function () {
-    return Inertia::render('articles/mvt-article-page');
-})->name('mvt.article.page');
+    Route::get('/catalogues', function () {
+        return Inertia::render('articles/catalogue-page');
+    })->name('catalogue.page');
 
-Route::get('/clients', function () {
-    return Inertia::render('client/client-page');
-})->name('client.page');
+    Route::get('/clients', function () {
+        return Inertia::render('client/client-page');
+    })->name('client.page');
 
-Route::get('/quotes', function () {
-    return Inertia::render('quotes/quote-page');
-})->name('quote.page');
+    Route::get('/quotes', function () {
+        return Inertia::render('quotes/quote-page');
+    })->name('quote.page');
+});
 
-Route::get('/users', function () {
-    return Inertia::render('users/user-page');
-})->name('users.page');
+// ============================================
+// ROUTES ADMIN DE COMPAGNIE (admin_company OU super_admin)
+// ============================================
+
+Route::middleware(['auth', 'verified', 'role:admin_company,super_admin'])->group(function () {
+
+    Route::get('/company/profile', function () {
+        return Inertia::render('company/company-profile');
+    })->name('company.profile');
+
+    Route::get('/mouvements', function () {
+        return Inertia::render('articles/mvt-article-page');
+    })->name('article.mvt.page');
+
+    Route::get('/users', function () {
+        return Inertia::render('users/user-page');
+    })->name('users.page');
+});
+
+// ============================================
+// ROUTES SUPER ADMIN UNIQUEMENT
+// ============================================
+
+Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
+
+    Route::get('/companies', function () {
+        return Inertia::render('company/company-page');
+    })->name('company.page');
+});
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
