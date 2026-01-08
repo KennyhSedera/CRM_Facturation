@@ -1,1 +1,0 @@
-import{a as c,j as o,H as p}from"./app-G_7I0-aL.js";const l=({title:e,favicon:n})=>{const a=c().props.auth?.user?.company,s=a?.company_name?`${e} - ${a.company_name}`:`${e} - FacturePro`,r=a?.company_logo?`/storage/${a.company_logo}`:n||"/facture-pro.png";return o.jsxs(p,{children:[o.jsx("title",{children:s}),o.jsx("link",{rel:"icon",type:"image/png",href:r})]})};export{l as H};

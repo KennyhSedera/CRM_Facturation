@@ -68,11 +68,9 @@ export default function Create() {
     });
 
     const handleSubmit = async () => {
-        // Réinitialiser les messages
         setSubmitError(null);
         setSubmitSuccess(null);
 
-        // Validation de toutes les étapes
         for (let i = 1; i <= steps.length; i++) {
             if (!validateStep(i)) {
                 setCurrentStep(i);
@@ -81,13 +79,9 @@ export default function Create() {
             }
         }
 
-        // Préparer les données du formulaire
         const formData = new FormData();
-
-        // Ajouter tous les champs au FormData
         Object.keys(data).forEach((key) => {
             const value = data[key as keyof typeof data];
-
             if (key === 'company_logo' && value instanceof File) {
                 formData.append(key, value);
             } else if (value !== null && value !== undefined) {
@@ -98,11 +92,11 @@ export default function Create() {
         try {
             const response = await fetch(route('companies.store'), {
                 method: 'POST',
+                body: formData,
+                credentials: 'include',
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                     Accept: 'application/json',
                 },
-                body: formData,
             });
 
             const result = await response.json();
@@ -110,7 +104,6 @@ export default function Create() {
             if (response.ok && result.success) {
                 setSubmitSuccess(result.message || 'Entreprise créée avec succès !');
                 console.log("Données de l'entreprise:", result.data);
-
                 setTimeout(() => {
                     window.location.href = route('companies.index');
                 }, 2000);
