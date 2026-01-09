@@ -31,10 +31,7 @@ class TelegramController extends Controller
 
     public function handle(Request $request, Nutgram $bot)
     {
-        Log::info('Webhook reçu', $request->all());
-
         try {
-            Log::info('Avant $bot->run()');
             $bot->sendMessage('gvdsvgd');
             $bot->run();
             Log::info('Après $bot->run()');
