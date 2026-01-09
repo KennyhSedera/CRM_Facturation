@@ -19,23 +19,23 @@ Route::prefix('companies')->group(function () {
     Route::get('/{id}/users', [CompanyController::class, 'getUsers']);
 });
 
-Route::middleware('auth:sanctum')->group(function () {
-    // routes clients
-    Route::apiResource('clients', ClientController::class);
-    Route::post('clients/{id}/toggle-status', [ClientController::class, 'toggleStatus']);
-    Route::get('clients/{id}/statistics', [ClientController::class, 'statistics']);
+// Route::middleware('auth:sanctum')->group(function () {
+// routes clients
+Route::apiResource('clients', ClientController::class);
+Route::post('clients/{id}/toggle-status', [ClientController::class, 'toggleStatus']);
+Route::get('clients/{id}/statistics', [ClientController::class, 'statistics']);
 
-    // routes articles
-    Route::apiResource('articles', ArticleController::class);
+// routes articles
+Route::apiResource('articles', ArticleController::class);
 
-    // routes mvt article
-    Route::apiResource('mvt_articles', MvtArticlesController::class);
+// routes mvt article
+Route::apiResource('mvt_articles', MvtArticlesController::class);
 
-    // routes quote
-    Route::apiResource('quotes', QuoteController::class);
+// routes quote
+Route::apiResource('quotes', QuoteController::class);
 
-    // routes quote item
-    Route::apiResource('quote_items', QuoteItemController::class);
-});
+// routes quote item
+Route::apiResource('quote_items', QuoteItemController::class);
+// });
 
 Route::get('/pdf', [PdfController::class, 'generate']);
