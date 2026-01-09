@@ -21,6 +21,28 @@ class ClientController extends Controller
             $search = $request->get('search');
             $status = $request->get('status');
 
+            if ($user->user_role === 'super_admin') {
+                $query = Client::with(['user', 'company']);
+                if (!empty($search)) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('client_name', 'ILIKE', "%{$search}%")
+                            ->orWhere('client_email', 'ILIKE', "%{$search}%")
+                            ->orWhere('client_phone', 'ILIKE', "%{$search}%")
+                            ->orWhere('client_reference', 'ILIKE', "%{$search}%");
+                    });
+                }
+                if (!is_null($status)) {
+                    $query->where('client_status', $status);
+                }
+                $clients = $query
+                    ->orderBy('created_at', 'desc')
+                    ->paginate($perPage);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Clients retrieved successfully',
+                    'data' => $clients
+                ], 200);
+            }
             $query = Client::where('company_id', $user->company_id)
                 ->with(['user', 'company']);
 

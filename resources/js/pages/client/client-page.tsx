@@ -2,6 +2,7 @@ import Head from '@/components/head';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { ApiWrapper, Client, PaginationData } from '@/types/client';
+import axios from 'axios';
 import { ChevronLeft, ChevronRight, Edit, Eye, Filter, Mail, MapPin, Phone, Plus, Search, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
@@ -30,8 +31,14 @@ const ClientPage: React.FC = () => {
         const fetchClients = async () => {
             setLoading(true);
             try {
-                const response = await fetch('/api/clients');
-                const result: ApiWrapper = await response.json();
+                const response = await axios.get('/api/clients', {
+                    withCredentials: true,
+                    headers: {
+                        Accept: 'application/json',
+                    },
+                });
+
+                const result: ApiWrapper = response.data;
 
                 if (result.success && result.data) {
                     const data = result.data;
@@ -49,7 +56,16 @@ const ClientPage: React.FC = () => {
                     setClients([]);
                 }
             } catch (error) {
-                console.error('Erreur lors du chargement:', error);
+                if (axios.isAxiosError(error)) {
+                    console.error('Erreur API:', error.response?.data?.message || error.message);
+
+                    if (error.response?.status === 401) {
+                        console.error('Non authentifié. Redirection vers login...');
+                        window.location.href = '/login';
+                    }
+                } else {
+                    console.error('Erreur lors du chargement:', error);
+                }
                 setClients([]);
             } finally {
                 setLoading(false);
