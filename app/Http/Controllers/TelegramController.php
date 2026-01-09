@@ -32,12 +32,8 @@ class TelegramController extends Controller
     public function handle(Request $request, Nutgram $bot)
 {
     try {
-        $bot->onCommand('start', function(Nutgram $bot) {
-            $bot->sendMessage('Ciao!');
-        });
-        
         $bot->run();
-        Log::info('Après $bot->run()');
+        
         return response()->json(['ok' => true]);
     } catch (\Throwable $e) {
         Log::error('Telegram webhook error', [
