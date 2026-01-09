@@ -30,7 +30,7 @@ return [
 
     'path' => env('SESSION_PATH', '/'),
 
-    'domain' => env('SESSION_DOMAIN'),
+    'domain' => env('SESSION_DOMAIN', null),
 
     'secure' => env('SESSION_SECURE_COOKIE'),
 
