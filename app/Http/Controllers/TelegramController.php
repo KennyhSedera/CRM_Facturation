@@ -35,6 +35,7 @@ class TelegramController extends Controller
 
         try {
             Log::info('Avant $bot->run()');
+            $bot->sendMessage('gvdsvgd');
             $bot->run();
             Log::info('Après $bot->run()');
 
