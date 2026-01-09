@@ -37,7 +37,7 @@ class CreateCompanyCommand
         return InlineKeyboardMarkup::make()
             ->addRow(
                 InlineKeyboardButton::make('🆓 Gratuitement (0 FCFA)', callback_data: 'plan:free'),
-                InlineKeyboardButton::make('⭐ Premium (9.900 Ar)', callback_data: 'plan:premium')
+                InlineKeyboardButton::make('⭐ Premium (9.900 FCFA)', callback_data: 'plan:premium')
             )
             ->addRow(
                 InlineKeyboardButton::make('🏢 Entreprise (14.900 FCFA)', callback_data: 'plan:entreprise'),

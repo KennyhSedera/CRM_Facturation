@@ -30,6 +30,7 @@ class PendingPaymentsCommand extends Command
             ->limit(10)
             ->get();
 
+
         if ($pendingPayments->isEmpty()) {
             $bot->sendMessage(
                 "✅ <b>Aucun paiement en attente</b>\n\n"
@@ -42,22 +43,41 @@ class PendingPaymentsCommand extends Command
         $message = "💳 <b>Paiements en attente</b>\n\n"
             . "📊 Total : <b>{$pendingPayments->count()}</b> paiement(s)\n\n";
 
-        $keyboard = InlineKeyboardMarkup::make();
-
-        foreach ($pendingPayments as $payment) {
+        // Ajouter les détails dans le message
+        foreach ($pendingPayments as $index => $payment) {
             $planEmoji = $payment->plan_type === 'premium' ? '⭐' : '🏢';
             $amount = number_format((float) $payment->amount, 0, ',', ' ');
 
+            $message .= ($index + 1) . ". {$planEmoji} <b>{$payment->company->company_name}</b>\n";
+            $message .= "   💰 {$amount} FCFA\n";
+            $message .= "   📋 Type: {$payment->action_type}\n";
+            $message .= "   📅 " . $payment->created_at->format('d/m/Y H:i') . "\n\n";
+        }
+
+        $message .= "Sélectionnez un paiement pour le valider :";
+
+        // Créer le clavier avec des boutons simples
+        $keyboard = InlineKeyboardMarkup::make();
+
+        foreach ($pendingPayments as $index => $payment) {
+            $planEmoji = $payment->plan_type === 'premium' ? '⭐' : '🏢';
+            $companyName = mb_strlen($payment->company->company_name) > 25
+                ? mb_substr($payment->company->company_name, 0, 25) . '...'
+                : $payment->company->company_name;
+
+            // Bouton simple sans HTML ni saut de ligne
+            $buttonText = ($index + 1) . ". {$planEmoji} {$companyName}";
+
             $keyboard->addRow(
                 InlineKeyboardButton::make(
-                    "{$planEmoji} {$payment->user->name} - {$amount} FCFA",
+                    $buttonText,
                     callback_data: "admin_payment_view_{$payment->payment_id}"
                 )
             );
         }
 
         $bot->sendMessage(
-            text: $message . "Sélectionnez un paiement pour le valider :",
+            text: $message,
             parse_mode: 'HTML',
             reply_markup: $keyboard
         );

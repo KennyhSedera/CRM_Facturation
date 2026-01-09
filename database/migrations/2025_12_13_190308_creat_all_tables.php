@@ -10,21 +10,6 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        // Table Company
-        Schema::create('company', function (Blueprint $table) {
-            $table->id('company_id');
-            $table->string('company_email')->unique();
-            $table->string('company_name');
-            $table->string('company_logo')->nullable();
-            $table->enum('plan_status', ['free', 'basic', 'premium', 'enterprise'])->default('free');
-            $table->timestamps();
-        });
-
-        // Modification de la table Users existante
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('company_id')->nullable()->after('password')->constrained('company', 'company_id')->onDelete('set null')->onUpdate('cascade');
-            $table->string('user_role')->default('user')->after('company_id');
-        });
 
         // Table Clients
         Schema::create('clients', function (Blueprint $table) {

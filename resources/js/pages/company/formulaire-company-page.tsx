@@ -10,6 +10,7 @@ import SelectInput from '@/components/ui/SelectInput';
 import TextArea from '@/components/ui/text-area';
 import TextInput from '@/components/ui/text-input';
 import { Head, useForm, usePage } from '@inertiajs/react';
+import axios from 'axios';
 import { Building2, Info, MapPin, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { GiReceiveMoney } from 'react-icons/gi';
@@ -86,6 +87,7 @@ export default function Create() {
         }
 
         const formData = new FormData();
+
         Object.keys(data).forEach((key) => {
             const value = data[key as keyof typeof data];
 
@@ -93,40 +95,62 @@ export default function Create() {
                 formData.append(key, value);
             } else if (typeof value === 'boolean') {
                 formData.append(key, value ? '1' : '0');
-            } else if (value !== null && value !== undefined) {
+            } else if (value !== null && value !== undefined && value !== '') {
                 formData.append(key, String(value));
             }
         });
 
+        console.log('=== Données envoyées ===');
+        for (let pair of formData.entries()) {
+            if (pair[1] instanceof File) {
+                console.log(pair[0], '→ File:', pair[1].name, '(' + pair[1].size + ' bytes)');
+            } else {
+                console.log(pair[0], '→', pair[1]);
+            }
+        }
+
         try {
-            const response = await fetch('/api/companies', {
-                method: 'POST',
-                body: formData,
-                credentials: 'include',
+            const response = await axios.post('/api/companies', formData, {
                 headers: {
                     Accept: 'application/json',
                 },
+                withCredentials: true,
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+                    console.log('Upload progress:', percentCompleted + '%');
+                },
             });
 
-            const result = await response.json();
+            const result = response.data;
 
-            if (response.ok && result.success) {
+            console.log('✅ Réponse du serveur:', result);
+
+            if (result.success) {
                 setSubmitSuccess(result.message || 'Entreprise créée avec succès !');
 
-                setTimeout(async () => {
-                    window.location.href =
-                        '/login?email=' +
-                        data.company_email +
+                setTimeout(() => {
+                    const redirectUrl =
+                        '/login?' +
+                        'email=' +
+                        encodeURIComponent(data.company_email) +
                         '&password=' +
-                        data.company_name +
-                        '&redirect_url=/dashboard&redirect_text=Veuillez vous connecter avec votre adresse email:';
+                        encodeURIComponent(data.company_name) +
+                        '&redirect_url=/dashboard' +
+                        '&redirect_text=' +
+                        encodeURIComponent('Veuillez vous connecter avec votre adresse email:');
+
+                    window.location.href = redirectUrl;
                 }, 2000);
             } else {
+                // Cas où la réponse est 200 mais success = false
                 if (result.errors) {
-                    console.log(result.errors);
+                    console.log('❌ Erreurs de validation:', result.errors);
 
                     Object.keys(result.errors).forEach((key) => {
-                        setError(key as any, result.errors[key][0]);
+                        const errorMessage = Array.isArray(result.errors[key]) ? result.errors[key][0] : result.errors[key];
+                        console.log(errorMessage);
+
+                        // setError(key as any, { type: 'manual', message: errorMessage });
                     });
                     setSubmitError(result.message || 'Erreur de validation');
                     setCurrentStep(1);
@@ -136,8 +160,42 @@ export default function Create() {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         } catch (error) {
-            console.error('Erreur:', error);
-            setSubmitError('Une erreur réseau est survenue. Veuillez réessayer.');
+            console.error('🔴 Erreur complète:', error);
+
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    console.error('📊 Status:', error.response.status);
+                    console.error('📦 Response Data:', error.response.data);
+                    console.error('📋 Headers:', error.response.headers);
+
+                    const result = error.response.data;
+
+                    if (result.errors) {
+                        console.log('❌ Erreurs de validation:', result.errors);
+
+                        Object.keys(result.errors).forEach((key) => {
+                            const errorMessage = Array.isArray(result.errors[key]) ? result.errors[key][0] : result.errors[key];
+                            console.log(errorMessage);
+                        });
+                        setSubmitError(result.message || 'Erreur de validation');
+                        setCurrentStep(1);
+                    } else {
+                        setSubmitError(result.message || `Erreur ${error.response.status}: ${error.response.statusText}`);
+                    }
+                } else if (error.request) {
+                    console.error('📡 Aucune réponse du serveur');
+                    console.error('Request:', error.request);
+                    setSubmitError('Le serveur ne répond pas. Vérifiez que le backend est démarré.');
+                } else {
+                    console.error('⚙️ Erreur de configuration:', error.message);
+                    setSubmitError('Erreur lors de la préparation de la requête.');
+                }
+            } else {
+                // Erreur non-Axios
+                console.error('❌ Erreur inattendue:', error);
+                setSubmitError('Une erreur inattendue est survenue. Veuillez réessayer.');
+            }
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };

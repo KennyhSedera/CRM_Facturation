@@ -29,7 +29,7 @@ return [
         'PREMIUM' => [
             'name' => 'Premium',
             'icon' => '⭐',
-            'price' => 9900,
+            'price' => 9.900,
             'billing_period' => 'monthly',
             'limits' => [
                 'clients_max' => null,
@@ -58,7 +58,7 @@ return [
         'ENTERPRISE' => [
             'name' => 'Entreprise',
             'icon' => '🏢',
-            'price' => 14900,
+            'price' => 14.900,
             'billing_period' => 'custom',
             'limits' => [
                 'clients_max' => null,
