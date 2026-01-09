@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CompanyController;
@@ -39,3 +40,13 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('/pdf', [PdfController::class, 'generate']);
+
+Route::get('/clients/company/{id}', [ClientController::class, 'getByCompany']);
+
+
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+});

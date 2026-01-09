@@ -23,6 +23,7 @@ const mainNavItems: NavItem[] = [
         title: 'Clients',
         href: '/clients',
         icon: Users,
+        roles: ['user', 'admin_company'],
     },
     {
         title: 'Catalogues',

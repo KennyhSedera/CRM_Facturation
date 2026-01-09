@@ -338,4 +338,43 @@ class ClientController extends Controller
             ], 500);
         }
     }
+
+    public function getByCompany(Request $request, $id)
+    {
+        try {
+            $perPage = $request->get('per_page', 5);
+            $search = $request->get('search');
+            $status = $request->get('status');
+
+            $query = Client::where('company_id', $id)
+                ->with(['user', 'company']);
+
+            if (!empty($search)) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('client_name', 'LIKE', "%{$search}%")
+                        ->orWhere('client_email', 'LIKE', "%{$search}%")
+                        ->orWhere('client_phone', 'LIKE', "%{$search}%")
+                        ->orWhere('client_reference', 'LIKE', "%{$search}%");
+                });
+            }
+
+            if (!is_null($status)) {
+                $query->where('client_status', $status);
+            }
+
+            $clients = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Clients retrieved successfully',
+                'data' => $clients
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving clients',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
