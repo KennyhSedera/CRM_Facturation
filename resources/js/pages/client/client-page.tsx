@@ -1,5 +1,6 @@
 import Head from '@/components/head';
 import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/axios';
 import type { BreadcrumbItem } from '@/types';
 import { ApiWrapper, Client, PaginationData } from '@/types/client';
 import axios from 'axios';
@@ -31,13 +32,7 @@ const ClientPage: React.FC = () => {
         const fetchClients = async () => {
             setLoading(true);
             try {
-                const response = await axios.get('/api/clients', {
-                    withCredentials: true,
-                    headers: {
-                        Accept: 'application/json',
-                    },
-                });
-
+                const response = await api.get('/clients');
                 const result: ApiWrapper = response.data;
 
                 if (result.success && result.data) {
@@ -58,11 +53,7 @@ const ClientPage: React.FC = () => {
             } catch (error) {
                 if (axios.isAxiosError(error)) {
                     console.error('Erreur API:', error.response?.data?.message || error.message);
-
-                    if (error.response?.status === 401) {
-                        console.error('Non authentifié. Redirection vers login...');
-                        window.location.href = '/login';
-                    }
+                    // La redirection 401 est gérée par l'intercepteur
                 } else {
                     console.error('Erreur lors du chargement:', error);
                 }
