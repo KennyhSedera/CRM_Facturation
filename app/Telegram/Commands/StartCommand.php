@@ -18,6 +18,9 @@ class StartCommand extends Command
         if (!$user) {
             (new CreateCompanyCommand())->handle($bot);
             return;
+        } else if ($user->company === null) {
+            (new CreateCompanyCommand())->handle($bot);
+            return;
         } else {
             $message = $this->getWelcomeMessage($bot->user()->first_name, $user);
             $bot->sendMessage(
