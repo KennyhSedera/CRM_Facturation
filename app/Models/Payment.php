@@ -204,8 +204,16 @@ class Payment extends Model
     public static function getPlanPrices(): array
     {
         return [
-            'premium' => config('subscription.plans.PREMIUM.price') ?? 9900,
-            'enterprise' => config('subscription.plans.ENTERPRISE.price') ?? 14900,
+            'premium' => (config('subscription.plans.PREMIUM.price') * 1000) ?? 9900,
+            'enterprise' => (config('subscription.plans.ENTERPRISE.price') * 1000) ?? 14900,
         ];
     }
+
+    public static function getPlanPrice(string $plan): int
+    {
+        $planKey = strtoupper($plan);
+        $price = config("subscription.plans.$planKey.price", 0);
+        return (int) ($price * 1000);
+    }
+
 }

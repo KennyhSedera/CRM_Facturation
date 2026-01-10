@@ -10,6 +10,8 @@ use App\Telegram\Commands\CreateCompanyCommand;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Hash;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
 class PaymentProofHandler
 {
@@ -551,10 +553,25 @@ class PaymentProofHandler
             . "⚠️ <b>L'entreprise est inactive jusqu'à validation du paiement</b>\n\n"
             . "👉 Validez le paiement pour activer l'entreprise automatiquement.";
 
+        $keyboard = InlineKeyboardMarkup::make()
+            ->addRow(
+                InlineKeyboardButton::make('✅ Valider', callback_data: "admin_payment_approve_{$payment->payment_id}"),
+                InlineKeyboardButton::make('❌ Rejeter', callback_data: "admin_payment_reject_{$payment->payment_id}")
+            )
+            ->addRow(
+                InlineKeyboardButton::make('🔙 Retour', callback_data: 'admin_payments_list')
+            );
+
         foreach ($adminIds as $adminId) {
             if ($adminId) {
                 try {
-                    $bot->sendPhoto($fileId, chat_id: trim($adminId), caption: $message, parse_mode: 'HTML');
+                    $bot->sendPhoto(
+                        $fileId,
+                        chat_id: trim($adminId),
+                        caption: $message,
+                        parse_mode: 'HTML',
+                        reply_markup: $keyboard
+                    );
                 } catch (\Exception $e) {
                     \Log::error("Failed to notify admin {$adminId}: " . $e->getMessage());
                 }

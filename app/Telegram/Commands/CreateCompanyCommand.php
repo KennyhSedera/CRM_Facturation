@@ -3,6 +3,7 @@
 namespace App\Telegram\Commands;
 
 use App\Models\Company;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -201,13 +202,7 @@ class CreateCompanyCommand
     protected static function requestPayment(Nutgram $bot): void
     {
         $plan = $bot->getUserData('selected_plan');
-        $prices = \App\Models\Payment::getPlanPrices();
-
-        $price = match ($plan) {
-            'premium' => $prices['premium'] ?? 9900,
-            'entreprise' => $prices['enterprise'] ?? 14900,
-            default => 0
-        };
+        $price = Payment::getPlanPrice($plan);
 
         $currency = config('subscription.currency') ?? 'FCFA';
         $planName = strtoupper($plan);
@@ -221,7 +216,7 @@ class CreateCompanyCommand
         $message = "💳 <b>Paiement requis</b>\n\n"
             . "{$planEmoji} <b>Plan {$planName}</b>\n\n"
             . "📋 <b>Avantages :</b>\n{$benefits[$plan]}\n\n"
-            . "💰 Prix : <b>" . number_format($price, 0, ',', ' ') . " {$currency}/mois</b>\n"
+            . "💰 Prix : <b>" . $price . " {$currency}/mois</b>\n"
             . "📅 Durée : <b>1 mois</b>\n\n"
             . "⚠️ <b>Important :</b> Votre entreprise sera créée après validation du paiement par notre équipe.\n\n"
             . "Choisissez votre mode de paiement :";
@@ -276,14 +271,8 @@ class CreateCompanyCommand
                 default => 'free'
             };
 
-            $prices = \App\Models\Payment::getPlanPrices();
-            $planPrice = match ($plan) {
-                'premium' => $prices['premium'] ?? 9900,
-                'entreprise' => $prices['enterprise'] ?? 14900,
-                default => 0
-            };
+            $planPrice = Payment::getPlanPrice($plan);
 
-            // Si isActive n'est pas spécifié, déterminer selon le plan
             if ($isActive === null) {
                 $isActive = ($plan === 'free');
             }
