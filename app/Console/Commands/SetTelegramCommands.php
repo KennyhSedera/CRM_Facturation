@@ -39,8 +39,8 @@ class SetTelegramCommands extends Command
                 'description' => 'Gestion des clients 👥',
             ],
             [
-                'command' => 'ticket',
-                'description' => 'Support & tickets 🎫',
+                'command' => 'articles',
+                'description' => 'Gestion des articles 📦',
             ],
             [
                 'command' => 'subscription',

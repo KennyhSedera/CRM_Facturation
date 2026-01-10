@@ -259,7 +259,7 @@ class CreateCompanyCommand
     /**
      * Créer l'entreprise (PUBLIC pour être appelée depuis PaymentProofHandler)
      */
-    public static function createCompany(Nutgram $bot, bool $isActive = null): void
+    public static function createCompany(Nutgram $bot, $isActive = null): void
     {
         try {
             $plan = $bot->getUserData('selected_plan');

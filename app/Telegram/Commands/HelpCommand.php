@@ -107,16 +107,6 @@ class HelpCommand extends Command
         $bot->answerCallbackQuery();
 
         $message = "❓ <b>Questions Fréquentes (FAQ)</b>\n\n"
-            . "<b>Comment créer un ticket ?</b>\n"
-            . "Utilisez la commande /ticket ou cliquez sur le bouton correspondant dans le menu.\n\n"
-
-            . "<b>Combien de temps pour une réponse ?</b>\n"
-            . "• Tickets normaux : 24-48h\n"
-            . "• Tickets urgents : 2-4h\n"
-            . "• Support premium : réponse prioritaire\n\n"
-
-            . "<b>Comment voir mes tickets ?</b>\n"
-            . "Utilisez /mytickets pour voir tous vos tickets avec leur statut actuel.\n\n"
 
             . "<b>Comment créer une entreprise ?</b>\n"
             . "Utilisez /createcompany et suivez les étapes guidées. Vous devrez fournir :\n"
@@ -194,7 +184,6 @@ class HelpCommand extends Command
 
             . "⚡ <b>Support en ligne 24/7 via ce bot Telegram !</b>\n\n"
             . "Pour une assistance rapide :\n"
-            . "• Créez un ticket : /ticket\n"
             . "• Consultez la FAQ : /faq\n"
             . "• Vérifiez votre abonnement : /subscription\n\n"
 
@@ -240,13 +229,6 @@ class HelpCommand extends Command
             . "• Ajoutez des clients : /clients\n"
             . "• Suivez vos limites selon votre plan\n\n"
 
-            . "<b>3️⃣ Créer un Ticket</b>\n"
-            . "• Utilisez /ticket\n"
-            . "• Choisissez la catégorie appropriée\n"
-            . "• Décrivez clairement votre problème\n"
-            . "• Ajoutez des captures d'écran si nécessaire\n"
-            . "• Suivez le statut avec /mytickets\n\n"
-
             . "<b>4️⃣ Gestion des Clients</b>\n"
             . "• Accédez au menu : /clients\n"
             . "• Limites selon plan :\n"
@@ -272,8 +254,7 @@ class HelpCommand extends Command
 
             . "<b>7️⃣ Aide Rapide</b>\n"
             . "• Tapez votre question directement\n"
-            . "• Mots-clés détectés : prix, livraison, retour, etc.\n"
-            . "• Support réactif via tickets";
+            . "• Mots-clés détectés : prix, livraison, retour, etc.\n";
 
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
@@ -604,10 +585,6 @@ class HelpCommand extends Command
             . "📖 <b>/help</b> - Afficher cette aide complète\n"
             . "🔄 <b>/cancel</b> - Annuler l'action ou le processus en cours\n\n"
 
-            . "<b>🎫 Gestion des Tickets :</b>\n"
-            . "• <b>/ticket</b> - Créer un nouveau ticket de support\n"
-            . "• <b>/mytickets</b> - Voir tous mes tickets (ouverts et fermés)\n\n"
-
             . "<b>🏢 Gestion d'Entreprise :</b>\n"
             . "• <b>/createcompany</b> - Créer une nouvelle entreprise\n"
             . "• <b>/profile</b> - Voir mon profil et mes informations\n\n"
@@ -618,6 +595,12 @@ class HelpCommand extends Command
             . "  - Voir les détails d'un client\n"
             . "  - Supprimer un client\n"
             . "  - Créer des devis (selon plan)\n\n"
+
+            . "<b>📦 Gestion des Articles :</b>\n"
+            . "• <b>/articles</b> - Gérer mes articles (liste, ajout, modification)\n"
+            . "  - Ajouter un article\n"
+            . "  - Voir les détails d'un article\n"
+            . "  - Supprimer un article\n\n"
 
             . "<b>💳 Abonnements et Paiements :</b>\n"
             . "• <b>/subscription</b> - Gérer mon abonnement\n"
@@ -700,29 +683,6 @@ class HelpCommand extends Command
     public static function contextualHelp(Nutgram $bot, string $context): void
     {
         $messages = [
-            'ticket_creation' => "💡 <b>Aide : Création de Ticket</b>\n\n"
-                . "Pour créer un ticket efficacement :\n\n"
-                . "1. Choisissez la bonne catégorie\n"
-                . "2. Soyez précis dans votre description\n"
-                . "3. Ajoutez des captures d'écran si possible\n"
-                . "4. Indiquez les détails importants (numéro de commande, date, etc.)\n\n"
-                . "Utilisez /cancel pour annuler.",
-
-            'waiting_response' => "💡 <b>En Attente de Réponse</b>\n\n"
-                . "Votre ticket est en cours de traitement.\n\n"
-                . "• Vous recevrez une notification dès qu'un agent répondra\n"
-                . "• Temps de réponse moyen : 24-48h\n"
-                . "• Support prioritaire pour abonnés Premium/Entreprise\n"
-                . "• Pour une question urgente, contactez-nous : /contact",
-
-            'no_tickets' => "💡 <b>Aucun Ticket</b>\n\n"
-                . "Vous n'avez pas encore créé de ticket.\n\n"
-                . "Créez-en un pour :\n"
-                . "• Signaler un problème\n"
-                . "• Poser une question\n"
-                . "• Demander de l'aide\n\n"
-                . "Utilisez /ticket pour commencer.",
-
             'payment_pending' => "💡 <b>Paiement en Cours</b>\n\n"
                 . "Votre paiement est en cours de validation.\n\n"
                 . "• Vous recevrez une notification dès la validation\n"

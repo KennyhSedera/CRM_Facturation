@@ -41,7 +41,7 @@ class StartCommand extends Command
             . "📊 Calculer vos installations solaires\n"
             . "👥 Gérer vos clients\n"
             . "📋 Générer des devis professionnels\n"
-            . "📦 Accéder au catalogue de matériel\n\n"
+            . "📦 Accéder aux articles et matériels\n\n"
             . "🎁 <b>Vous démarrez en mode GRATUIT :</b>\n"
             . "• Jusqu'à <b>3 clients</b>\n"
             . "• <b>5 devis par mois</b>\n"
@@ -88,7 +88,7 @@ class StartCommand extends Command
             . "📊 /calculate - Calculer une installation\n"
             . "👥 /clients - Gérer vos clients\n"
             . "📋 /quotes - Créer un devis\n"
-            . "📦 /catalog - Voir le catalogue\n"
+            . "📦 /articles - Gérer vos articles\n"
             . "👤 /profile - Mon profil\n"
             . "⚙️ /settings - Paramètres\n\n"
             . "💡 Besoin d'aide ? Tapez /help";

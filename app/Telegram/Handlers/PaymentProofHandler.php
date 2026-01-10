@@ -557,9 +557,6 @@ class PaymentProofHandler
             ->addRow(
                 InlineKeyboardButton::make('✅ Valider', callback_data: "admin_payment_approve_{$payment->payment_id}"),
                 InlineKeyboardButton::make('❌ Rejeter', callback_data: "admin_payment_reject_{$payment->payment_id}")
-            )
-            ->addRow(
-                InlineKeyboardButton::make('🔙 Retour', callback_data: 'admin_payments_list')
             );
 
         foreach ($adminIds as $adminId) {

@@ -1,5 +1,6 @@
 <?php
 
+use App\Telegram\Callbacks\AlertCallback;
 use App\Telegram\Handlers\PaymentProofHandler;
 use App\Telegram\Handlers\CreateCompanyPaymentHandler;
 use SergiX44\Nutgram\Nutgram;
@@ -16,8 +17,13 @@ use App\Telegram\Callbacks\MenuCallback;
 use App\Telegram\Callbacks\TicketCallback;
 use App\Telegram\Commands\Admin\AdminPaymentCallbackHandler;
 use App\Telegram\Commands\Admin\PendingPaymentsCommand;
+use App\Telegram\Commands\ArticleCallbackHandler;
+use App\Telegram\Commands\ArticleMessageHandler;
+use App\Telegram\Commands\ArticlesCommand;
 use App\Telegram\Conversations\CreateTicketConversation;
 use App\Telegram\Handlers\TextHandler;
+use Illuminate\Console\View\Components\Alert;
+
 // use App\Telegram\Middleware\AdminMiddleware;
 
 /*
@@ -33,6 +39,7 @@ $bot->registerCommand(ProfileCommand::class);
 $bot->registerCommand(ClientsCommand::class);
 $bot->registerCommand(SubscriptionCommand::class);
 $bot->registerCommand(PendingPaymentsCommand::class);
+$bot->registerCommand(ArticlesCommand::class);
 
 // Commande pour créer une entreprise
 $bot->onCommand('createcompany', CreateCompanyCommand::class);
@@ -44,6 +51,13 @@ $bot->onCommand('cancel', function (Nutgram $bot) {
     $awaitingProof = $bot->getGlobalData('awaiting_payment_proof');
     $awaitingCreationProof = $bot->getGlobalData('awaiting_creation_payment_proof');
     $awaitingReject = $bot->getGlobalData('awaiting_reject_reason');
+
+    // Articles
+    $awaitingArticleData = $bot->getGlobalData('awaiting_article_data');
+    $awaitingArticleEdit = $bot->getGlobalData('awaiting_article_edit');
+    $awaitingStockAdd = $bot->getGlobalData('awaiting_stock_add');
+    $awaitingStockRemove = $bot->getGlobalData('awaiting_stock_remove');
+    $awaitingStockReplace = $bot->getGlobalData('awaiting_stock_replace');
 
     if ($awaitingCompanyData) {
         CreateCompanyCommand::cancelProcess($bot);
@@ -69,6 +83,46 @@ $bot->onCommand('cancel', function (Nutgram $bot) {
         $bot->sendMessage(
             text: "❌ <b>Ajout de client annulé</b>\n\n" .
             "Utilisez /clients pour gérer vos clients.",
+            parse_mode: \SergiX44\Nutgram\Telegram\Properties\ParseMode::HTML
+        );
+    } elseif ($awaitingArticleData) {
+        $bot->deleteGlobalData('awaiting_article_data');
+        $bot->deleteGlobalData('user_telegram_id');
+        $bot->sendMessage(
+            text: "❌ <b>Ajout d'article annulé</b>\n\n" .
+            "Utilisez /articles pour gérer vos articles.",
+            parse_mode: \SergiX44\Nutgram\Telegram\Properties\ParseMode::HTML
+        );
+    } elseif ($awaitingArticleEdit) {
+        $bot->deleteGlobalData('awaiting_article_edit');
+        $bot->deleteGlobalData('user_telegram_id');
+        $bot->sendMessage(
+            text: "❌ <b>Modification d'article annulée</b>\n\n" .
+            "Utilisez /articles pour gérer vos articles.",
+            parse_mode: \SergiX44\Nutgram\Telegram\Properties\ParseMode::HTML
+        );
+    } elseif ($awaitingStockAdd) {
+        $bot->deleteGlobalData('awaiting_stock_add');
+        $bot->deleteGlobalData('user_telegram_id');
+        $bot->sendMessage(
+            text: "❌ <b>Ajout de stock annulé</b>\n\n" .
+            "Utilisez /articles pour gérer vos articles.",
+            parse_mode: \SergiX44\Nutgram\Telegram\Properties\ParseMode::HTML
+        );
+    } elseif ($awaitingStockRemove) {
+        $bot->deleteGlobalData('awaiting_stock_remove');
+        $bot->deleteGlobalData('user_telegram_id');
+        $bot->sendMessage(
+            text: "❌ <b>Retrait de stock annulé</b>\n\n" .
+            "Utilisez /articles pour gérer vos articles.",
+            parse_mode: \SergiX44\Nutgram\Telegram\Properties\ParseMode::HTML
+        );
+    } elseif ($awaitingStockReplace) {
+        $bot->deleteGlobalData('awaiting_stock_replace');
+        $bot->deleteGlobalData('user_telegram_id');
+        $bot->sendMessage(
+            text: "❌ <b>Remplacement de stock annulé</b>\n\n" .
+            "Utilisez /articles pour gérer vos articles.",
             parse_mode: \SergiX44\Nutgram\Telegram\Properties\ParseMode::HTML
         );
     } elseif ($awaitingProof) {
@@ -223,7 +277,7 @@ $bot->onCallbackQueryData('client_view_{id}', function (Nutgram $bot, int $id) {
 
 // Éditer un client
 $bot->onCallbackQueryData('client_edit_{id}', function (Nutgram $bot, int $id) {
-    $bot->answerCallbackQuery("⚠️ Fonctionnalité en développement", show_alert: true);
+    (new AlertCallback())->handle($bot);
 });
 
 // Supprimer un client
@@ -238,12 +292,12 @@ $bot->onCallbackQueryData('client_delete_confirm_{id}', function (Nutgram $bot, 
 
 // Rechercher un client
 $bot->onCallbackQueryData('client_search', function (Nutgram $bot) {
-    $bot->answerCallbackQuery("⚠️ Fonctionnalité en développement", show_alert: true);
+    (new AlertCallback())->handle($bot);
 });
 
 // Créer un devis pour un client
 $bot->onCallbackQueryData('quote_create_{id}', function (Nutgram $bot, int $id) {
-    $bot->answerCallbackQuery("⚠️ Fonctionnalité en développement", show_alert: true);
+    (new AlertCallback())->handle($bot);
 });
 
 /*
@@ -285,6 +339,12 @@ $bot->onText('.*', function (Nutgram $bot) {
     $awaitingProof = $bot->getGlobalData('awaiting_payment_proof');
     $awaitingCreationProof = $bot->getGlobalData('awaiting_creation_payment_proof');
     $awaitingReject = $bot->getGlobalData('awaiting_reject_reason');
+    $awaitingArticleData = $bot->getGlobalData('awaiting_article_data');
+    $awaitingArticleEdit = $bot->getGlobalData('awaiting_article_edit');
+    $awaitingStockAdjustment = $bot->getGlobalData('awaiting_stock_adjustment');
+    $awaitingStockAdd = $bot->getGlobalData('awaiting_stock_add');
+    $awaitingStockRemove = $bot->getGlobalData('awaiting_stock_remove');
+    $awaitingStockReplace = $bot->getGlobalData('awaiting_stock_replace');
 
     // Si l'utilisateur envoie les infos d'entreprise (format message unique)
     if ($awaitingCompanyData) {
@@ -313,6 +373,38 @@ $bot->onText('.*', function (Nutgram $bot) {
     // Si admin donne une raison de rejet
     if ($awaitingReject && $bot->getGlobalData('user_telegram_id') == $bot->user()->id) {
         AdminPaymentCallbackHandler::processRejectReason($bot);
+        return;
+    }
+
+    if ($awaitingArticleData && $bot->getGlobalData('user_telegram_id') == $bot->user()->id) {
+        ArticleCallbackHandler::processArticleData($bot);
+        return;
+    }
+
+    if ($awaitingArticleEdit && $bot->getGlobalData('user_telegram_id') == $bot->user()->id) {
+        ArticleCallbackHandler::processArticleEdit($bot, $awaitingArticleEdit);
+        return;
+    }
+    // if ($awaitingStockAdjustment && $bot->getGlobalData('user_telegram_id') == $bot->user()->id) {
+    //     ArticleCallbackHandler::processStockAdjustment($bot, $awaitingStockAdjustment);
+    //     return;
+    // }
+
+    // Si l'utilisateur ajoute du stock
+    if ($awaitingStockAdd && $bot->getGlobalData('user_telegram_id') == $bot->user()->id) {
+        ArticleCallbackHandler::processStockAdd($bot, $awaitingStockAdd);
+        return;
+    }
+
+    // Si l'utilisateur retire du stock
+    if ($awaitingStockRemove && $bot->getGlobalData('user_telegram_id') == $bot->user()->id) {
+        ArticleCallbackHandler::processStockRemove($bot, $awaitingStockRemove);
+        return;
+    }
+
+    // Si l'utilisateur remplace le stock
+    if ($awaitingStockReplace && $bot->getGlobalData('user_telegram_id') == $bot->user()->id) {
+        ArticleCallbackHandler::processStockReplace($bot, $awaitingStockReplace);
         return;
     }
 
@@ -349,31 +441,54 @@ $bot->onDocument(function (Nutgram $bot) {
 
 /*
 |--------------------------------------------------------------------------
-| Protection des Commandes Admin avec Middleware (Optionnel)
+| Callbacks Gestion des Articles
 |--------------------------------------------------------------------------
 */
 
-// Décommenter si vous voulez activer la protection par middleware
+// Callbacks pour les articles
+$bot->onCallbackQueryData('article_menu', [ArticleCallbackHandler::class, 'showMenu']);
+$bot->onCallbackQueryData('article_list', [ArticleCallbackHandler::class, 'listArticles']);
+$bot->onCallbackQueryData('article_add', [ArticleCallbackHandler::class, 'addArticle']);
 
-// // Méthode 1 : Protéger une commande spécifique
-// $bot->registerCommand(PendingPaymentsCommand::class)
-//     ->middleware(AdminMiddleware::class);
+// Pattern matching pour les IDs
+$bot->onCallbackQueryData('article_view_{articleId}', function (Nutgram $bot, $articleId) {
+    ArticleCallbackHandler::viewArticle($bot, (int) $articleId);
+});
 
-// // Méthode 2 : Groupe de commandes admin
-// $bot->group(function (Nutgram $bot) {
-//     $bot->registerCommand(PendingPaymentsCommand::class);
-//     // Ajoutez d'autres commandes admin ici
-// })->middleware(AdminMiddleware::class);
+$bot->onCallbackQueryData('article_edit_{articleId}', function (Nutgram $bot, $articleId) {
+    ArticleCallbackHandler::editArticle($bot, (int) $articleId);
+});
 
-// // Méthode 3 : Protection manuelle dans les callbacks
-// $bot->onCallbackQueryData('admin_payment_view_{id}', function (Nutgram $bot, int $id) {
-//     if (!AdminMiddleware::isAdmin($bot)) {
-//         $bot->answerCallbackQuery("❌ Accès refusé", show_alert: true);
-//         return;
-//     }
-//     AdminPaymentCallbackHandler::viewPayment($bot, $id);
-// });
+$bot->onCallbackQueryData('article_stock_{articleId}', function (Nutgram $bot, $articleId) {
+    ArticleCallbackHandler::adjustStock($bot, (int) $articleId);
+});
 
+$bot->onCallbackQueryData('article_delete_{articleId}', function (Nutgram $bot, $articleId) {
+    ArticleCallbackHandler::deleteArticle($bot, (int) $articleId);
+});
+
+$bot->onCallbackQueryData('article_delete_confirm_{articleId}', function (Nutgram $bot, $articleId) {
+    ArticleCallbackHandler::confirmDelete($bot, (int) $articleId);
+});
+// Dans votre fichier de routes Telegram
+
+// Callbacks pour ajustement de stock
+$bot->onCallbackQueryData('stock_add_{articleId}', function (Nutgram $bot, $articleId) {
+    ArticleCallbackHandler::stockAdd($bot, (int) $articleId);
+});
+
+$bot->onCallbackQueryData('stock_remove_{articleId}', function (Nutgram $bot, $articleId) {
+    ArticleCallbackHandler::stockRemove($bot, (int) $articleId);
+});
+
+$bot->onCallbackQueryData('stock_replace_{articleId}', function (Nutgram $bot, $articleId) {
+    ArticleCallbackHandler::stockReplace($bot, (int) $articleId);
+});
+
+// Callback pour l'historique
+$bot->onCallbackQueryData('article_history_{articleId}', function (Nutgram $bot, $articleId) {
+    ArticleCallbackHandler::showHistory($bot, (int) $articleId);
+});
 /*
 |--------------------------------------------------------------------------
 | Gestion des erreurs

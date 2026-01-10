@@ -356,6 +356,22 @@ class ClientCallbackHandler
 
         $bot->answerCallbackQuery();
     }
+
+    /**
+     * Rechercher un client
+     */
+    public static function searchClient(Nutgram $bot): void
+    {
+        $bot->answerCallbackQuery("⚠️ Fonctionnalité en développement", show_alert: true);
+    }
+
+    /**
+     * Voir tous les clients
+     */
+    public static function editClient(Nutgram $bot, $id): void
+    {
+        $bot->sendMessage(text: "⚠️ Fonctionnalité en développement", parse_mode: 'HTML');
+    }
 }
 
 /**

@@ -25,11 +25,11 @@ const mainNavItems: NavItem[] = [
         icon: Users,
         roles: ['user', 'admin_company'],
     },
-    {
-        title: 'Catalogues',
-        href: '/catalogues',
-        icon: Package,
-    },
+    // {s
+    //     title: 'Catalogues',
+    //     href: '/catalogues',
+    //     icon: Package,
+    // },
     {
         title: 'Articles',
         href: '/articles',

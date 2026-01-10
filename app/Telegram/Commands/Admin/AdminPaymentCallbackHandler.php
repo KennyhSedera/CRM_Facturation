@@ -209,6 +209,7 @@ class AdminPaymentCallbackHandler
         $reason = trim($bot->message()->text);
 
         $payment = Payment::with(['user', 'company'])->find($paymentId);
+        $user = User::where('telegram_id', $bot->user()->id)->first();
 
         if (!$payment) {
             $bot->sendMessage("❌ Paiement non trouvé.");
@@ -216,7 +217,7 @@ class AdminPaymentCallbackHandler
         }
 
         try {
-            $adminId = $bot->user()->id;
+            $adminId = $user->id;
             $payment->reject($adminId, $reason);
 
             $bot->sendMessage(
