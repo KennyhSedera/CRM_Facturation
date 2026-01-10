@@ -18,11 +18,9 @@ use App\Telegram\Callbacks\TicketCallback;
 use App\Telegram\Commands\Admin\AdminPaymentCallbackHandler;
 use App\Telegram\Commands\Admin\PendingPaymentsCommand;
 use App\Telegram\Commands\ArticleCallbackHandler;
-use App\Telegram\Commands\ArticleMessageHandler;
 use App\Telegram\Commands\ArticlesCommand;
 use App\Telegram\Conversations\CreateTicketConversation;
 use App\Telegram\Handlers\TextHandler;
-use Illuminate\Console\View\Components\Alert;
 
 // use App\Telegram\Middleware\AdminMiddleware;
 
@@ -43,6 +41,9 @@ $bot->registerCommand(ArticlesCommand::class);
 
 // Commande pour créer une entreprise
 $bot->onCommand('createcompany', CreateCompanyCommand::class);
+$bot->onCommand('quotes', [AlertCallback::class, 'handle']);
+$bot->onCommand('calculate', [AlertCallback::class, 'handle']);
+$bot->onCommand('settings', [AlertCallback::class, 'handle']);
 
 // Commande pour annuler le processus
 $bot->onCommand('cancel', function (Nutgram $bot) {
