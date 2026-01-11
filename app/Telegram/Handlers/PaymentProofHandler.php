@@ -518,10 +518,22 @@ class PaymentProofHandler
             . "📱 Référence : <code>{$payment->payment_reference}</code>\n\n"
             . "👉 Utilisez cette référence pour valider le paiement.";
 
+        $keyboard = InlineKeyboardMarkup::make()
+            ->addRow(
+                InlineKeyboardButton::make('✅ Valider', callback_data: "admin_payment_approve_{$payment->payment_id}"),
+                InlineKeyboardButton::make('❌ Rejeter', callback_data: "admin_payment_reject_{$payment->payment_id}")
+            );
+
         foreach ($adminIds as $adminId) {
             if ($adminId) {
                 try {
-                    $bot->sendPhoto($fileId, chat_id: trim($adminId), caption: $message, parse_mode: 'HTML');
+                    $bot->sendPhoto(
+                        $fileId,
+                        chat_id: trim($adminId),
+                        caption: $message,
+                        parse_mode: 'HTML',
+                        reply_markup: $keyboard
+                    );
                 } catch (\Exception $e) {
                     \Log::error("Failed to notify admin {$adminId}: " . $e->getMessage());
                 }

@@ -30,42 +30,45 @@ class PendingPaymentsCommand extends Command
             ->limit(10)
             ->get();
 
-
         if ($pendingPayments->isEmpty()) {
             $bot->sendMessage(
                 "✅ <b>Aucun paiement en attente</b>\n\n"
                 . "Tous les paiements ont été traités.",
-                parse_mode: 'HTML'
+                parse_mode: 'HTML',
+                reply_markup: InlineKeyboardMarkup::make()->addRow(
+                    InlineKeyboardButton::make('🔙 Menu Admin', callback_data: 'admin_menu')
+                )
             );
             return;
         }
 
+        // Construire le message
         $message = "💳 <b>Paiements en attente</b>\n\n"
             . "📊 Total : <b>{$pendingPayments->count()}</b> paiement(s)\n\n";
 
-        // Ajouter les détails dans le message
         foreach ($pendingPayments as $index => $payment) {
             $planEmoji = $payment->plan_type === 'premium' ? '⭐' : '🏢';
             $amount = number_format((float) $payment->amount, 0, ',', ' ');
 
             $message .= ($index + 1) . ". {$planEmoji} <b>{$payment->company->company_name}</b>\n";
             $message .= "   💰 {$amount} FCFA\n";
-            $message .= "   📋 Type: {$payment->action_type}\n";
+            $message .= "   📋 Type: " . $payment->getActionTypeLabel() . "\n";
             $message .= "   📅 " . $payment->created_at->format('d/m/Y H:i') . "\n\n";
         }
 
-        $message .= "Sélectionnez un paiement pour le valider :";
+        $message .= "👇 Sélectionnez un paiement pour voir les détails :";
 
-        // Créer le clavier avec des boutons simples
+        // Créer le clavier
         $keyboard = InlineKeyboardMarkup::make();
 
         foreach ($pendingPayments as $index => $payment) {
             $planEmoji = $payment->plan_type === 'premium' ? '⭐' : '🏢';
+
+            // Limiter la longueur du nom
             $companyName = mb_strlen($payment->company->company_name) > 25
                 ? mb_substr($payment->company->company_name, 0, 25) . '...'
                 : $payment->company->company_name;
 
-            // Bouton simple sans HTML ni saut de ligne
             $buttonText = ($index + 1) . ". {$planEmoji} {$companyName}";
 
             $keyboard->addRow(
@@ -75,6 +78,11 @@ class PendingPaymentsCommand extends Command
                 )
             );
         }
+
+        // Ajouter un bouton retour
+        $keyboard->addRow(
+            InlineKeyboardButton::make('🔙 Menu Admin', callback_data: 'admin_menu')
+        );
 
         $bot->sendMessage(
             text: $message,

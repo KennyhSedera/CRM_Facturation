@@ -270,50 +270,50 @@ class ArticleCallbackHandler
         ])->first();
 
         if ($existing) {
-            $bot->sendMessage('⚠️ Cette article déjà enregistrée !');
-        } else {
-            try {
-                $article = Article::create($articleData);
+            $bot->sendMessage("⚠️ Cette article déjà enregistrée ! \n\n💡 Ajouter de nouveau ou tapez /cancel pour annuler");
+            return;
+        }
+        try {
+            $article = Article::create($articleData);
 
-                if ($article->quantity_stock > 0) {
-                    MvtArticle::create([
-                        'mvtType' => 'entree',
-                        'mvt_quantity' => $article->quantity_stock,
-                        'mvt_date' => now(),
-                        'article_id' => $article->article_id,
-                        'user_id' => $user->id,
-                    ]);
-                }
-
-                $priceWithTVA = $article->selling_price * (1 + $article->article_tva / 100);
-
-                $message = "✅ <b>Article créé avec succès !</b>\n\n"
-                    . "📦 <b>{$article->article_name}</b>\n"
-                    . "🔖 Réf: {$article->article_reference}\n\n"
-                    . "💰 Prix HT : " . number_format($article->selling_price, 0, ',', ' ') . " FCFA\n"
-                    . "💵 TVA : {$article->article_tva}%\n"
-                    . "💸 Prix TTC : " . number_format($priceWithTVA, 0, ',', ' ') . " FCFA\n\n"
-                    . "📦 Stock : {$article->quantity_stock} {$article->article_unité}";
-
-                $keyboard = InlineKeyboardMarkup::make()
-                    ->addRow(
-                        InlineKeyboardButton::make('📦 Voir l\'article', callback_data: "article_view_{$article->article_id}"),
-                        InlineKeyboardButton::make('📋 Tous les articles', callback_data: 'article_list')
-                    )
-                    ->addRow(
-                        InlineKeyboardButton::make('🏢 Menu Principal', callback_data: 'menu_back')
-                    );
-
-                $bot->sendMessage($message, parse_mode: 'HTML', reply_markup: $keyboard);
-
-                // Réinitialiser l'état
-                $bot->deleteGlobalData('awaiting_article_data');
-
-            } catch (\Exception $e) {
-                $bot->sendMessage(
-                    "❌ Erreur lors de la création de l'article : " . $e->getMessage()
-                );
+            if ($article->quantity_stock > 0) {
+                MvtArticle::create([
+                    'mvtType' => 'entree',
+                    'mvt_quantity' => $article->quantity_stock,
+                    'mvt_date' => now(),
+                    'article_id' => $article->article_id,
+                    'user_id' => $user->id,
+                ]);
             }
+
+            $priceWithTVA = $article->selling_price * (1 + $article->article_tva / 100);
+
+            $message = "✅ <b>Article créé avec succès !</b>\n\n"
+                . "📦 <b>{$article->article_name}</b>\n"
+                . "🔖 Réf: {$article->article_reference}\n\n"
+                . "💰 Prix HT : " . number_format($article->selling_price, 0, ',', ' ') . " FCFA\n"
+                . "💵 TVA : {$article->article_tva}%\n"
+                . "💸 Prix TTC : " . number_format($priceWithTVA, 0, ',', ' ') . " FCFA\n\n"
+                . "📦 Stock : {$article->quantity_stock} {$article->article_unité}";
+
+            $keyboard = InlineKeyboardMarkup::make()
+                ->addRow(
+                    InlineKeyboardButton::make('📦 Voir l\'article', callback_data: "article_view_{$article->article_id}"),
+                    InlineKeyboardButton::make('📋 Tous les articles', callback_data: 'article_list')
+                )
+                ->addRow(
+                    InlineKeyboardButton::make('🏢 Menu Principal', callback_data: 'menu_back')
+                );
+
+            $bot->sendMessage($message, parse_mode: 'HTML', reply_markup: $keyboard);
+
+            // Réinitialiser l'état
+            $bot->deleteGlobalData('awaiting_article_data');
+
+        } catch (\Exception $e) {
+            $bot->sendMessage(
+                "❌ Erreur lors de la création de l'article : " . $e->getMessage()
+            );
         }
     }
 

@@ -97,7 +97,6 @@ class CreateCompanyCommand
     {
         $text = trim($bot->message()->text);
 
-        // Vérifier annulation
         if (strtolower($text) === '/cancel') {
             self::cancelProcess($bot);
             $bot->sendMessage(
@@ -109,10 +108,8 @@ class CreateCompanyCommand
             return;
         }
 
-        // Séparer les lignes
         $lines = array_map('trim', explode("\n", $text));
 
-        // Validation : minimum 5 lignes (sans site web)
         if (count($lines) < 5) {
             $bot->sendMessage(
                 "❌ <b>Format incorrect</b>\n\n"
@@ -165,6 +162,16 @@ class CreateCompanyCommand
 
         if (strlen($companyAddress) < 5) {
             $errors[] = "• L'adresse doit contenir au moins 5 caractères";
+        }
+
+        $existingCompanyByName = Company::where('company_name', $companyName)->first();
+        if ($existingCompanyByName) {
+            $errors[] = "• Ce nom d'entreprise est déjà utilisé";
+        }
+
+        $existingCompanyByEmail = Company::where('company_email', $companyEmail)->first();
+        if ($existingCompanyByEmail) {
+            $errors[] = "• Cet email est déjà utilisé par une autre entreprise";
         }
 
         // Si erreurs, afficher et demander de réessayer

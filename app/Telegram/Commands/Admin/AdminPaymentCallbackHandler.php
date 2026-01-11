@@ -89,17 +89,19 @@ class AdminPaymentCallbackHandler
                 . "💰 Montant : " . number_format((float) $payment->amount, 0, ',', ' ') . " FCFA";
 
             // Envoyer la photo/document
-            $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+            $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 
             if (in_array($extension, ['jpg', 'jpeg', 'png'])) {
+                // ✅ Utiliser InputFile au lieu de fopen()
                 $bot->sendPhoto(
-                    fopen($filePath, 'r'),
+                    \SergiX44\Nutgram\Telegram\Types\Internal\InputFile::make($filePath),
                     caption: $caption,
                     parse_mode: 'HTML'
                 );
             } else {
+                // ✅ Utiliser InputFile au lieu de fopen()
                 $bot->sendDocument(
-                    fopen($filePath, 'r'),
+                    \SergiX44\Nutgram\Telegram\Types\Internal\InputFile::make($filePath),
                     caption: $caption,
                     parse_mode: 'HTML'
                 );

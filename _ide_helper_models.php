@@ -24,6 +24,7 @@ namespace App\Models{
  * @property int $quantity_stock
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int|null $company_id
  * @property-read \App\Models\User $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Article newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Article newQuery()
@@ -34,6 +35,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Article whereArticleSource($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Article whereArticleTva($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Article whereArticleUnité($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Article whereCompanyId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Article whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Article whereQuantityStock($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Article whereSellingPrice($value)
@@ -178,6 +180,7 @@ namespace App\Models{
  * @property int $mvt_quantity
  * @property string $mvt_date
  * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Article|null $article
  * @property-read \App\Models\User $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MvtArticle newModelQuery()
@@ -189,6 +192,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MvtArticle whereMvtId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MvtArticle whereMvtQuantity($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MvtArticle whereMvtType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MvtArticle whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MvtArticle whereUserId($value)
  */
 	class MvtArticle extends \Eloquent {}
@@ -339,10 +343,10 @@ namespace App\Models{
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property string|null $telegram_id
- * @property string|null $avatar
  * @property int|null $company_id
  * @property string $user_role
+ * @property string|null $telegram_id
+ * @property string|null $avatar
  * @property-read \App\Models\Company|null $company
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count

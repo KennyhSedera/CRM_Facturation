@@ -181,7 +181,12 @@ class Payment extends Model
 
         $info = "{$statusEmoji[$this->status]} <b>Paiement {$this->payment_reference}</b>\n\n";
         $info .= "📦 Plan : <b>" . strtoupper($this->plan_type) . "</b>\n";
-        $info .= "🔄 Type : " . ($this->action_type === 'renew' ? 'Renouvellement' : 'Upgrade') . "\n";
+        $info .= "🔄 Type : " . match ($this->action_type) {
+            'renew' => 'Renouvellement',
+            'new' => 'Création',
+            'upgrade' => 'Upgrade',
+            default => ucfirst($this->action_type)
+        } . "\n";
         $info .= "{$methodEmoji[$this->payment_method]} Méthode : " . ucfirst(str_replace('_', ' ', $this->payment_method)) . "\n";
         $info .= "💰 Montant : <b>" . number_format($this->amount, 0, ',', ' ') . " {$this->currency}</b>\n";
         $info .= "📅 Date : " . $this->created_at->format('d/m/Y H:i') . "\n";
@@ -196,6 +201,16 @@ class Payment extends Model
         }
 
         return $info;
+    }
+
+    public function getActionTypeLabel(): string
+    {
+        return match ($this->action_type) {
+            'renew' => 'Renouvellement',
+            'new' => 'Création',
+            'upgrade' => 'Upgrade',
+            default => ucfirst($this->action_type)
+        };
     }
 
     /**
