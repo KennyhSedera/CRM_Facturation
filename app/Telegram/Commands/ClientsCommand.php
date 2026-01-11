@@ -20,8 +20,11 @@ class ClientsCommand extends Command
 
     public function handle(Nutgram $bot): void
     {
-        $user = User::where('telegram_id', $bot->user()->id)->with('company')->first();
+        $useraccess = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$useraccess)
+            return;
 
+        $user = User::where('telegram_id', $bot->user()->id)->with('company')->first();
         if (!$user || !$user->company_id) {
             $bot->sendMessage("❌ Vous devez d'abord créer votre entreprise. Utilisez /start");
             return;
@@ -60,6 +63,10 @@ class ClientCallbackHandler
      */
     public static function listClients(Nutgram $bot): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $user = User::where('telegram_id', $bot->user()->id)->first();
 
         if (!$user) {
@@ -115,6 +122,10 @@ class ClientCallbackHandler
      */
     public static function viewClient(Nutgram $bot, int $clientId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $client = Client::find($clientId);
 
         if (!$client) {
@@ -150,6 +161,10 @@ class ClientCallbackHandler
      */
     public static function addClient(Nutgram $bot): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $bot->answerCallbackQuery();
 
         $message = "➕ <b>Ajouter un nouveau client</b>\n\n"
@@ -179,6 +194,10 @@ class ClientCallbackHandler
      */
     public static function processClientData(Nutgram $bot): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $text = trim($bot->message()->text);
         $lines = array_map('trim', explode("\n", $text));
 
@@ -270,6 +289,10 @@ class ClientCallbackHandler
      */
     public static function deleteClient(Nutgram $bot, int $clientId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $client = Client::find($clientId);
 
         if (!$client) {
@@ -298,6 +321,10 @@ class ClientCallbackHandler
      */
     public static function confirmDelete(Nutgram $bot, int $clientId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $client = Client::with('company')->find($clientId);
 
         if (!$client) {
@@ -342,6 +369,10 @@ class ClientCallbackHandler
      */
     public static function showMenu(Nutgram $bot): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $user = User::where('telegram_id', $bot->user()->id)->with('company')->first();
         $clientCount = Client::where('company_id', $user->company_id)->count();
 

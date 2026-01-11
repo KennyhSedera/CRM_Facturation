@@ -345,7 +345,7 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int|null $company_id
  * @property string $user_role
- * @property string|null $telegram_id
+ * @property int|null $telegram_id
  * @property string|null $avatar
  * @property-read \App\Models\Company|null $company
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications

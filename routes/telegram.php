@@ -51,8 +51,6 @@ $bot->onCommand('cancel', function (Nutgram $bot) {
     $awaitingProof = $bot->getGlobalData('awaiting_payment_proof');
     $awaitingCreationProof = $bot->getGlobalData('awaiting_creation_payment_proof');
     $awaitingReject = $bot->getGlobalData('awaiting_reject_reason');
-
-    // Articles
     $awaitingArticleData = $bot->getGlobalData('awaiting_article_data');
     $awaitingArticleEdit = $bot->getGlobalData('awaiting_article_edit');
     $awaitingStockAdd = $bot->getGlobalData('awaiting_stock_add');

@@ -7,6 +7,7 @@ use SergiX44\Nutgram\Handlers\Type\Command;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use App\Models\Payment;
+use App\Models\User;
 
 class PendingPaymentsCommand extends Command
 {
@@ -15,7 +16,10 @@ class PendingPaymentsCommand extends Command
 
     public function handle(Nutgram $bot): void
     {
-        // Vérifier si l'utilisateur est admin
+        $user = User::checkTelegramAdminAccess($bot);
+        if (!$user)
+            return;
+
         $adminIds = explode(',', env('TELEGRAM_ADMIN_IDS', ''));
 
         if (!in_array($bot->user()->id, array_map('trim', $adminIds))) {
@@ -23,7 +27,6 @@ class PendingPaymentsCommand extends Command
             return;
         }
 
-        // Récupérer les paiements en attente
         $pendingPayments = Payment::with(['user', 'company'])
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')

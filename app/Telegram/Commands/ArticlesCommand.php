@@ -8,7 +8,6 @@ use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use App\Models\User;
 use App\Models\Article;
-use App\Models\Company;
 use App\Models\MvtArticle;
 
 /**
@@ -21,6 +20,10 @@ class ArticlesCommand extends Command
 
     public function handle(Nutgram $bot): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $user = User::where('telegram_id', $bot->user()->id)->with('company')->first();
 
         if (!$user || !$user->company_id) {
@@ -66,6 +69,10 @@ class ArticleCallbackHandler
      */
     public static function listArticles(Nutgram $bot): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $user = User::where('telegram_id', $bot->user()->id)->first();
 
         if (!$user) {
@@ -124,6 +131,10 @@ class ArticleCallbackHandler
      */
     public static function viewArticle(Nutgram $bot, int $articleId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $article = Article::find($articleId);
 
         if (!$article) {
@@ -175,6 +186,10 @@ class ArticleCallbackHandler
      */
     public static function addArticle(Nutgram $bot): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $bot->answerCallbackQuery();
 
         $message = "➕ <b>Ajouter un nouveau article</b>\n\n"
@@ -206,6 +221,10 @@ class ArticleCallbackHandler
      */
     public static function processArticleData(Nutgram $bot): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $text = trim($bot->message()->text);
         $lines = array_map('trim', explode("\n", $text));
 
@@ -322,6 +341,10 @@ class ArticleCallbackHandler
      */
     public static function editArticle(Nutgram $bot, int $articleId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $article = Article::find($articleId);
 
         if (!$article) {
@@ -360,6 +383,10 @@ class ArticleCallbackHandler
      */
     public static function processArticleEdit(Nutgram $bot, int $articleId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $text = trim($bot->message()->text);
         $lines = array_map('trim', explode("\n", $text));
 
@@ -435,6 +462,10 @@ class ArticleCallbackHandler
      */
     public static function adjustStock(Nutgram $bot, int $articleId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $article = Article::find($articleId);
 
         if (!$article) {
@@ -471,6 +502,10 @@ class ArticleCallbackHandler
      */
     public static function stockAdd(Nutgram $bot, int $articleId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $article = Article::find($articleId);
 
         if (!$article) {
@@ -496,6 +531,10 @@ class ArticleCallbackHandler
      */
     public static function stockRemove(Nutgram $bot, int $articleId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $article = Article::find($articleId);
 
         if (!$article) {
@@ -521,6 +560,10 @@ class ArticleCallbackHandler
      */
     public static function stockReplace(Nutgram $bot, int $articleId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $article = Article::find($articleId);
 
         if (!$article) {
@@ -546,6 +589,10 @@ class ArticleCallbackHandler
      */
     public static function processStockAdd(Nutgram $bot, int $articleId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $text = trim($bot->message()->text);
 
         if (!is_numeric($text) || $text <= 0) {
@@ -600,6 +647,10 @@ class ArticleCallbackHandler
      */
     public static function processStockRemove(Nutgram $bot, int $articleId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $text = trim($bot->message()->text);
 
         if (!is_numeric($text) || $text <= 0) {
@@ -668,6 +719,10 @@ class ArticleCallbackHandler
      */
     public static function processStockReplace(Nutgram $bot, int $articleId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $text = trim($bot->message()->text);
 
         if (!is_numeric($text) || $text < 0) {
@@ -725,6 +780,10 @@ class ArticleCallbackHandler
      */
     public static function showHistory(Nutgram $bot, int $articleId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $article = Article::find($articleId);
 
         if (!$article) {
@@ -780,6 +839,10 @@ class ArticleCallbackHandler
      */
     public static function deleteArticle(Nutgram $bot, int $articleId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $article = Article::find($articleId);
 
         if (!$article) {
@@ -809,6 +872,10 @@ class ArticleCallbackHandler
      */
     public static function confirmDelete(Nutgram $bot, int $articleId): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $article = Article::find($articleId);
 
         if (!$article) {
@@ -838,6 +905,10 @@ class ArticleCallbackHandler
      */
     public static function showMenu(Nutgram $bot): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         $user = User::where('telegram_id', $bot->user()->id)->first();
         $articleCount = Article::where('user_id', $user->id)->count();
         $totalStock = Article::where('user_id', $user->id)->sum('quantity_stock');

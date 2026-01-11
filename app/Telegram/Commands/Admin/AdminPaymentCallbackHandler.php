@@ -207,6 +207,10 @@ class AdminPaymentCallbackHandler
      */
     public static function processRejectReason(Nutgram $bot): void
     {
+        $user = User::checkTelegramAdminAccess($bot);
+        if (!$user)
+            return;
+
         $paymentId = $bot->getGlobalData('reject_payment_id');
         $reason = trim($bot->message()->text);
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use SergiX44\Nutgram\Nutgram;
 
 class User extends Authenticatable
 {
@@ -30,61 +31,182 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'telegram_id' => 'integer',
         ];
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relations
+    |--------------------------------------------------------------------------
+    */
 
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id', 'company_id');
     }
 
-    /**
-     * Vérifier si l'utilisateur a un rôle spécifique
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Méthodes de vérification des rôles (Web)
+    |--------------------------------------------------------------------------
+    */
+
     public function hasRole(string $role): bool
     {
         return $this->user_role === $role;
     }
 
-    /**
-     * Vérifier si l'utilisateur a un des rôles dans un tableau
-     */
     public function hasAnyRole(array $roles): bool
     {
         return in_array($this->user_role, $roles);
     }
 
-    /**
-     * Vérifier si l'utilisateur est super admin
-     */
     public function isSuperAdmin(): bool
     {
         return $this->hasRole('super_admin');
     }
 
-    /**
-     * Vérifier si l'utilisateur est admin (super_admin OU admin_company)
-     */
     public function isAdmin(): bool
     {
         return $this->hasAnyRole(['super_admin', 'admin_company']);
     }
 
-    /**
-     * Vérifier si l'utilisateur est admin de sa compagnie
-     */
     public function isCompanyAdmin(): bool
     {
         return $this->hasRole('admin_company');
     }
 
-    /**
-     * Vérifier si l'utilisateur est un simple utilisateur
-     */
     public function isUser(): bool
     {
         return $this->hasRole('user');
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Méthodes Telegram
+    |--------------------------------------------------------------------------
+    */
+
+    public static function findByTelegramId(int $telegramId): ?self
+    {
+        return self::with('company')->where('telegram_id', $telegramId)->first();
+    }
+
+    public function canAccess(bool $requireCompany = true): bool
+    {
+        if ($requireCompany) {
+            if (!$this->company_id) {
+                return false;
+            }
+
+            if (!$this->company || !$this->company->is_active) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function getAccessDeniedMessage(bool $requireCompany = true): ?string
+    {
+        if ($requireCompany) {
+            if (!$this->company_id) {
+                return "⚠️ <b>Entreprise requise</b>\n\n"
+                    . "Vous devez d'abord créer une entreprise.\n"
+                    . "Utilisez /createcompany pour commencer.";
+            }
+
+            if (!$this->company || !$this->company->is_active) {
+                return "🚫 <b>Entreprise inactive</b>\n\n"
+                    . "Votre entreprise est actuellement inactive.\n\n"
+                    . "Raisons possibles :\n"
+                    . "• Abonnement expiré\n"
+                    . "• Suspension administrative\n"
+                    . "• Paiement en attente\n\n"
+                    . "Utilisez /subscription pour renouveler votre abonnement.";
+            }
+        }
+
+        return null;
+    }
+
+    public function checkAccessOrFail(Nutgram $bot, bool $requireCompany = true): bool
+    {
+        $errorMessage = $this->getAccessDeniedMessage($requireCompany);
+
+        if ($errorMessage) {
+            $bot->sendMessage(
+                $errorMessage,
+                parse_mode: \SergiX44\Nutgram\Telegram\Properties\ParseMode::HTML
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function checkTelegramAccess(Nutgram $bot, bool $requireCompany = true): ?self
+    {
+        $user = self::findByTelegramId($bot->userId());
+
+        if (!$user) {
+            $bot->sendMessage(
+                "❌ <b>Compte non trouvé</b>\n\n"
+                . "Vous devez d'abord créer un compte.\n"
+                . "Utilisez /start pour commencer.",
+                parse_mode: \SergiX44\Nutgram\Telegram\Properties\ParseMode::HTML
+            );
+            return null;
+        }
+
+        if (!$user->checkAccessOrFail($bot, $requireCompany)) {
+            return null;
+        }
+
+        return $user;
+    }
+
+    public function isTelegramAdmin(): bool
+    {
+        if (!$this->telegram_id) {
+            return false;
+        }
+
+        $adminIds = explode(',', env('TELEGRAM_ADMIN_IDS', ''));
+        $adminIds = array_map('trim', $adminIds);
+
+        return in_array($this->telegram_id, $adminIds);
+    }
+
+    public function checkTelegramAdminOrFail(Nutgram $bot): bool
+    {
+        if (!$this->isTelegramAdmin()) {
+            $bot->sendMessage("❌ Commande réservée aux administrateurs.");
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function checkTelegramAdminAccess(Nutgram $bot): ?self
+    {
+        $user = self::checkTelegramAccess($bot, requireCompany: false);
+        if (!$user)
+            return null;
+
+        if (!$user->checkTelegramAdminOrFail($bot)) {
+            return null;
+        }
+
+        return $user;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | JWT Methods
+    |--------------------------------------------------------------------------
+    */
 
     public function getJWTIdentifier()
     {
