@@ -226,6 +226,16 @@ class ClientCallbackHandler
             'client_note' => 'Client VIP - Paiement toujours à temps',
         ];
 
+        $existing = Client::where([
+            'client_name' => $clientData['client_name'],
+            'company_id' => $user->company_id,
+        ])->first();
+
+        if ($existing) {
+            $bot->sendMessage("⚠️ Ce client est déjà enregistré ! \n\n💡 Ajouter de nouveau ou tapez /cancel pour annuler");
+            return;
+        }
+
         try {
             $client = Client::createClient($clientData, $user->id, $user->company_id);
             Company::where('company_id', $user->company_id)
