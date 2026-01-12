@@ -23,6 +23,9 @@ use App\Telegram\Commands\MenuCommande;
 use App\Telegram\Conversations\CreateTicketConversation;
 use App\Telegram\Handlers\TextHandler;
 use SergiX44\Nutgram\Telegram\Properties\ParseMode;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
+use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +48,41 @@ $bot->onCommand('createcompany', CreateCompanyCommand::class);
 $bot->onCommand('quotes', [AlertCallback::class, 'handle']);
 $bot->onCommand('calculate', [AlertCallback::class, 'handle']);
 $bot->onCommand('settings', [AlertCallback::class, 'handle']);
+
+
+$bot->onCommand('formulaire', function (Nutgram $bot) {
+    $keyboard = InlineKeyboardMarkup::make()->addRow(
+        InlineKeyboardButton::make(
+            text: '📝 Remplir le formulaire',
+            web_app: new WebAppInfo(
+                url: 'https://priceless-swanson.217-154-114-211.plesk.page/company/form/telegram'
+            )
+        )
+    );
+
+    $bot->sendMessage(
+        text: "Clique ci-dessous pour remplir le formulaire 👇",
+        reply_markup: $keyboard
+    );
+});
+
+$bot->onWebAppData(function (Nutgram $bot, $data) {
+    $payload = json_decode($data->data, true);
+
+    $email = $payload['email'] ?? null;
+    $phone = $payload['phone'] ?? null;
+
+    // Exemple : stocker en DB
+    Log::info('Web app form data received', [
+        'email' => $email,
+        'phone' => $phone,
+    ]);
+
+    $bot->sendMessage(
+        text: "✅ Formulaire reçu !\n📧 Email: $email\n📞 Téléphone: $phone"
+    );
+});
+
 
 // Commande pour annuler le processus
 $bot->onCommand('cancel', function (Nutgram $bot) {

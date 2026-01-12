@@ -24,10 +24,17 @@ class Article extends Model
         'article_tva',
         'quantity_stock',
         'user_id',
+        'company_id',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id', 'company_id');
+    }
+
 }

@@ -25,6 +25,7 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int|null $company_id
+ * @property-read \App\Models\Company|null $company
  * @property-read \App\Models\User $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Article newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Article newQuery()
@@ -116,6 +117,8 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int|null $client_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Article> $articles
+ * @property-read int|null $articles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Company newModelQuery()

@@ -12,7 +12,7 @@ class ArticleController extends Controller
     // 1️⃣ Liste tous les articles
     public function index()
     {
-        $articles = Article::with('user')->get();
+        $articles = Article::with('user', 'company')->get();
 
         return response()->json([
             'success' => true,

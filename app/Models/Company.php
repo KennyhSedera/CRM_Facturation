@@ -46,4 +46,9 @@ class Company extends Model
     {
         return $this->hasMany(User::class, 'company_id', 'company_id');
     }
+
+    public function articles()
+    {
+        return $this->hasMany(Article::class, 'company_id', 'company_id');
+    }
 }
