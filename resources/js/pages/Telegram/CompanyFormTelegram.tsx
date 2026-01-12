@@ -82,6 +82,7 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
     const [errors, setErrors] = useState<FormErrors>({});
     const [isLoading, setIsLoading] = useState(false);
     const [tg, setTg] = useState<NonNullable<typeof window.Telegram>['WebApp'] | null>(null);
+    const [showFallbackButton, setShowFallbackButton] = useState(false);
 
     useEffect(() => {
         const telegram = window.Telegram?.WebApp;
@@ -108,12 +109,18 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
             const handleSubmitWrapper = () => handleSubmit();
             telegram.MainButton.onClick(handleSubmitWrapper);
 
+            // Vérifier si le MainButton s'affiche après 1 seconde
+            setTimeout(() => {
+                setShowFallbackButton(true);
+            }, 1000);
+
             return () => {
                 telegram.MainButton.offClick(handleSubmitWrapper);
                 telegram.MainButton.hide();
             };
         } else {
             console.warn('Telegram WebApp non disponible');
+            setShowFallbackButton(true);
         }
     }, []);
 
@@ -190,7 +197,9 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
             tg?.sendData(JSON.stringify(formData));
 
             // Fermer la WebApp
-            tg?.close();
+            setTimeout(() => {
+                tg?.close();
+            }, 500);
         } catch (error) {
             console.error('Erreur:', error);
             tg?.showAlert('❌ Une erreur est survenue. Veuillez réessayer.');
@@ -204,7 +213,7 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
             <Head title="Créer une entreprise" />
 
             <div
-                className="min-h-screen p-6"
+                className="min-h-screen p-6 pb-24"
                 style={{
                     backgroundColor: tg?.themeParams?.bg_color || '#ffffff',
                     color: tg?.themeParams?.text_color || '#000000',
@@ -386,10 +395,42 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                         <p className="flex items-start gap-2 text-sm text-blue-800">
                             <span className="text-lg">ℹ️</span>
                             <span>
-                                Cliquez sur le bouton <strong>"✅ Créer l'entreprise"</strong> en bas de l'écran pour valider le formulaire.
+                                {showFallbackButton
+                                    ? 'Cliquez sur le bouton ci-dessous pour créer votre entreprise'
+                                    : "Cliquez sur le bouton en bas de l'écran pour créer votre entreprise"}
                             </span>
                         </p>
                     </div>
+
+                    {/* BOUTON DE SECOURS */}
+                    {showFallbackButton && (
+                        <div className="fixed right-0 bottom-0 left-0 border-t-2 border-gray-200 bg-white p-4">
+                            <button
+                                onClick={handleSubmit}
+                                disabled={isLoading}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-500 px-6 py-4 font-bold text-white transition-colors hover:bg-blue-600 active:bg-blue-700 disabled:bg-gray-400"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            />
+                                        </svg>
+                                        <span>Création en cours...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>✅</span>
+                                        <span>Créer l'entreprise</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </>
