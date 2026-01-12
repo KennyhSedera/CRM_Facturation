@@ -184,25 +184,49 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
     };
 
     const handleSubmit = () => {
+        console.log('=== DÉBUT SUBMIT ===');
+        console.log('TG disponible?', !!tg);
+        console.log('FormData:', formData);
+
         if (!validateForm()) {
-            tg?.showAlert('⚠️ Veuillez corriger les erreurs dans le formulaire');
+            console.log('Validation échouée');
+            if (tg) {
+                tg.showAlert('⚠️ Veuillez corriger les erreurs dans le formulaire');
+            } else {
+                alert('⚠️ Veuillez corriger les erreurs dans le formulaire');
+            }
             return;
         }
 
+        console.log('Validation OK, envoi des données...');
         setIsLoading(true);
         tg?.MainButton.showProgress();
 
         try {
-            // Envoyer les données au bot
-            tg?.sendData(JSON.stringify(formData));
+            const dataToSend = JSON.stringify(formData);
+            console.log('Données à envoyer:', dataToSend);
 
-            // Fermer la WebApp
-            setTimeout(() => {
-                tg?.close();
-            }, 500);
+            if (tg) {
+                console.log('Envoi via Telegram WebApp...');
+                tg.sendData(dataToSend);
+                console.log('Données envoyées, fermeture dans 1s...');
+
+                setTimeout(() => {
+                    console.log('Fermeture de la WebApp');
+                    tg.close();
+                }, 1000);
+            } else {
+                console.error('Telegram WebApp non disponible!');
+                alert('❌ Telegram WebApp non disponible. Données: ' + dataToSend);
+                setIsLoading(false);
+            }
         } catch (error) {
-            console.error('Erreur:', error);
-            tg?.showAlert('❌ Une erreur est survenue. Veuillez réessayer.');
+            console.error("Erreur lors de l'envoi:", error);
+            if (tg) {
+                tg.showAlert('❌ Une erreur est survenue: ' + error);
+            } else {
+                alert('❌ Une erreur est survenue: ' + error);
+            }
             tg?.MainButton.hideProgress();
             setIsLoading(false);
         }
