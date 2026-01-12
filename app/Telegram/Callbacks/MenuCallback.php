@@ -118,7 +118,9 @@ class MenuCallback
      */
     public static function backToMenu(Nutgram $bot): void
     {
-        $bot->answerCallbackQuery();
+        if ($bot->callbackQuery() !== null) {
+            $bot->answerCallbackQuery();
+        }
 
         $message = "🏠 <b>FacturePro - Menu Principal</b>\n\n"
             . "Bienvenue sur votre assistant de facturation professionnel !\n\n"
@@ -131,6 +133,28 @@ class MenuCallback
             . "💡 <i>Sélectionnez une option ci-dessous pour commencer</i>";
 
         $bot->editMessageText(
+            text: $message,
+            reply_markup: MainMenuKeyboard::make(),
+            parse_mode: 'HTML'
+        );
+    }
+
+    /**
+     * Menu principal
+     */
+    public static function showMenu(Nutgram $bot): void
+    {
+        $message = "🏠 <b>FacturePro - Menu Principal</b>\n\n"
+            . "Bienvenue sur votre assistant de facturation professionnel !\n\n"
+            . "📄 <b>Gestion de Factures</b>\n"
+            . "Créez, consultez et gérez vos factures en quelques clics.\n\n"
+            . "👥 <b>Base Clients</b>\n"
+            . "Organisez vos contacts et historiques clients.\n\n"
+            . "📊 <b>Suivi d'Activité</b>\n"
+            . "Analysez votre chiffre d'affaires et performances.\n\n"
+            . "💡 <i>Sélectionnez une option ci-dessous pour commencer</i>";
+
+        $bot->sendMessage(
             text: $message,
             reply_markup: MainMenuKeyboard::make(),
             parse_mode: 'HTML'

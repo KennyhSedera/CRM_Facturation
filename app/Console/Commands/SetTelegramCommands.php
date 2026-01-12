@@ -23,16 +23,8 @@ class SetTelegramCommands extends Command
 
         $commands = [
             [
-                'command' => 'start',
+                'command' => 'menu',
                 'description' => 'Accueil du bot 🚀',
-            ],
-            [
-                'command' => 'help',
-                'description' => 'Aide & guide d’utilisation 🆘',
-            ],
-            [
-                'command' => 'profile',
-                'description' => 'Mon profil 👤',
             ],
             [
                 'command' => 'clients',
@@ -51,8 +43,16 @@ class SetTelegramCommands extends Command
                 'description' => 'Créer une entreprise 🏢',
             ],
             [
+                'command' => 'profile',
+                'description' => 'Mon profil 👤',
+            ],
+            [
                 'command' => 'cancel',
                 'description' => 'Annuler une action en cours ❌',
+            ],
+            [
+                'command' => 'help',
+                'description' => 'Aide & guide d’utilisation 🆘',
             ],
         ];
 

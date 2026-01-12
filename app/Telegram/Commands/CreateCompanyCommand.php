@@ -89,7 +89,6 @@ class CreateCompanyCommand
 
         $bot->editMessageText($message, parse_mode: ParseMode::HTML);
 
-        // Stocker l'état
         $bot->setUserData('awaiting_company_data', true);
     }
 

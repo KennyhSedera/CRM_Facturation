@@ -137,7 +137,7 @@ class ClientCallbackHandler
 
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
-                InlineKeyboardButton::make('✏️ Modifier', callback_data: "client_edit_{$clientId}"),
+                InlineKeyboardButton::make('✏️ Modifier', callback_data: "client_modify_{$clientId}"),
                 InlineKeyboardButton::make('📋 Créer devis', callback_data: "quote_create_{$clientId}")
             )
             ->addRow(
@@ -357,7 +357,7 @@ class ClientCallbackHandler
     {
         $limits = [
             'free' => 3,
-            'premium' => 50,
+            'premium' => 500,
             'enterprise' => 999999,
         ];
 
@@ -397,21 +397,320 @@ class ClientCallbackHandler
 
         $bot->answerCallbackQuery();
     }
-
     /**
      * Rechercher un client
      */
     public static function searchClient(Nutgram $bot): void
     {
-        $bot->answerCallbackQuery("⚠️ Fonctionnalité en développement", show_alert: true);
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
+        $bot->answerCallbackQuery();
+
+        $message = "🔍 <b>Rechercher un client</b>\n\n"
+            . "Envoyez-moi le nom, téléphone ou référence du client à rechercher.\n\n"
+            . "💡 <i>Tapez /cancel pour annuler</i>";
+
+        $bot->sendMessage($message, parse_mode: 'HTML');
+
+        // Stocker l'état pour le prochain message
+        $bot->setGlobalData('awaiting_search_query', true);
+        $bot->setGlobalData('user_telegram_id', $bot->user()->id);
     }
 
     /**
-     * Voir tous les clients
+     * Traiter la recherche de client
      */
-    public static function editClient(Nutgram $bot, $id): void
+    public static function processSearchQuery(Nutgram $bot): void
     {
-        $bot->sendMessage(text: "⚠️ Fonctionnalité en développement", parse_mode: 'HTML');
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
+        $query = trim($bot->message()->text);
+
+        if (empty($query)) {
+            $bot->sendMessage("❌ Veuillez entrer un terme de recherche valide.");
+            return;
+        }
+
+        $user = User::where('telegram_id', $bot->user()->id)->first();
+
+        if (!$user || !$user->company_id) {
+            $bot->sendMessage("❌ Erreur : entreprise non trouvée.");
+            return;
+        }
+
+        // ✅ Recherche insensible à la casse
+        $clients = Client::where('company_id', $user->company_id)
+            ->where(function ($q) use ($query) {
+                $q->whereRaw('LOWER(client_name) LIKE ?', ['%' . strtolower($query) . '%'])
+                    ->orWhereRaw('LOWER(client_phone) LIKE ?', ['%' . strtolower($query) . '%'])
+                    ->orWhereRaw('LOWER(client_reference) LIKE ?', ['%' . strtolower($query) . '%'])
+                    ->orWhereRaw('LOWER(client_email) LIKE ?', ['%' . strtolower($query) . '%']);
+            })
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        if ($clients->isEmpty()) {
+            $keyboard = InlineKeyboardMarkup::make()
+                ->addRow(
+                    InlineKeyboardButton::make('🔙 Retour au menu', callback_data: 'client_menu')
+                );
+
+            $bot->sendMessage(
+                "❌ <b>Aucun résultat</b>\n\n"
+                . "Aucun client trouvé pour : <code>{$query}</code>\n\n"
+                . "💡 Vérifiez l'orthographe ou essayez avec un autre terme.",
+                parse_mode: 'HTML',
+                reply_markup: $keyboard
+            );
+
+            $bot->deleteGlobalData('awaiting_search_query');
+            return;
+        }
+
+        $message = "🔍 <b>Résultats de recherche</b>\n\n"
+            . "Recherche : <code>{$query}</code>\n"
+            . "📊 {$clients->count()} résultat(s) trouvé(s)\n\n";
+
+        $keyboard = InlineKeyboardMarkup::make();
+
+        foreach ($clients as $client) {
+            $statusEmoji = $client->client_status === 'active' ? '✅' : '❌';
+            $keyboard->addRow(
+                InlineKeyboardButton::make(
+                    "{$statusEmoji} {$client->client_name} - {$client->client_phone}",
+                    callback_data: "client_view_{$client->client_id}"
+                )
+            );
+        }
+
+        $keyboard->addRow(
+            InlineKeyboardButton::make('🔍 Nouvelle recherche', callback_data: 'client_search'),
+            InlineKeyboardButton::make('🔙 Menu', callback_data: 'client_menu')
+        );
+
+        $bot->sendMessage(
+            text: $message . "Sélectionnez un client :",
+            parse_mode: 'HTML',
+            reply_markup: $keyboard
+        );
+
+        // Réinitialiser l'état
+        $bot->deleteGlobalData('awaiting_search_query');
+    }
+
+    /**
+     * Modifier un client
+     */
+    public static function editClient(Nutgram $bot, int $clientId): void
+    {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
+        $client = Client::find($clientId);
+
+        if (!$client) {
+            $bot->answerCallbackQuery("❌ Client non trouvé", show_alert: true);
+            return;
+        }
+
+        $bot->answerCallbackQuery();
+
+        $message = "✏️ <b>Modifier le client</b>\n\n"
+            . "Client actuel :\n"
+            . "👤 <b>{$client->client_name}</b>\n"
+            . "📞 {$client->client_phone}\n"
+            . "📧 " . ($client->client_email ?? 'Non renseigné') . "\n"
+            . "🆔 " . ($client->client_cin ?? 'Non renseigné') . "\n"
+            . "📍 " . ($client->client_adress ?? 'Non renseigné') . "\n\n"
+            . "Que souhaitez-vous modifier ?";
+
+        $keyboard = InlineKeyboardMarkup::make()
+            ->addRow(
+                InlineKeyboardButton::make('👤 Nom', callback_data: "client_edit_field_{$clientId}_name"),
+                InlineKeyboardButton::make('📞 Téléphone', callback_data: "client_edit_field_{$clientId}_phone")
+            )
+            ->addRow(
+                InlineKeyboardButton::make('📧 Email', callback_data: "client_edit_field_{$clientId}_email"),
+                InlineKeyboardButton::make('🆔 CIN', callback_data: "client_edit_field_{$clientId}_cin")
+            )
+            ->addRow(
+                InlineKeyboardButton::make('📍 Adresse', callback_data: "client_edit_field_{$clientId}_address"),
+                InlineKeyboardButton::make('🔄 Statut', callback_data: "client_toggle_status_{$clientId}")
+            )
+            ->addRow(
+                InlineKeyboardButton::make('🔙 Retour', callback_data: "client_view_{$clientId}")
+            );
+
+        $bot->editMessageText($message, parse_mode: 'HTML', reply_markup: $keyboard);
+    }
+    /**
+     * Modifier un champ spécifique du client
+     */
+    public static function editClientField(Nutgram $bot, int $clientId, string $field): void
+    {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
+        $client = Client::find($clientId);
+
+        if (!$client) {
+            $bot->answerCallbackQuery("❌ Client non trouvé", show_alert: true);
+            return;
+        }
+
+        $bot->answerCallbackQuery();
+
+        $fieldLabels = [
+            'name' => '👤 Nom',
+            'phone' => '📞 Téléphone',
+            'email' => '📧 Email',
+            'cin' => '🆔 CIN',
+            'address' => '📍 Adresse',
+        ];
+
+        $fieldLabel = $fieldLabels[$field] ?? $field;
+
+        $message = "✏️ <b>Modifier {$fieldLabel}</b>\n\n"
+            . "Client : <b>{$client->client_name}</b>\n\n"
+            . "Envoyez-moi la nouvelle valeur pour ce champ.\n\n"
+            . "💡 <i>Tapez /cancel pour annuler</i>";
+
+        $bot->sendMessage($message, parse_mode: 'HTML');
+
+        // Stocker l'état pour le prochain message
+        $bot->setGlobalData('editing_client_id', $clientId);
+        $bot->setGlobalData('editing_field', $field);
+        $bot->setGlobalData('user_telegram_id', $bot->user()->id);
+    }
+
+    /**
+     * Traiter la modification d'un champ
+     */
+    public static function processFieldEdit(Nutgram $bot): void
+    {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
+        $clientId = $bot->getGlobalData('editing_client_id');
+        $field = $bot->getGlobalData('editing_field');
+        $newValue = trim($bot->message()->text);
+
+        if (empty($newValue)) {
+            $bot->sendMessage("❌ La valeur ne peut pas être vide.");
+            return;
+        }
+
+        $client = Client::find($clientId);
+
+        if (!$client) {
+            $bot->sendMessage("❌ Client non trouvé.");
+            $bot->deleteGlobalData('editing_client_id');
+            $bot->deleteGlobalData('editing_field');
+            return;
+        }
+
+        // Mapper les noms de champs aux colonnes de la base de données
+        $fieldMapping = [
+            'name' => 'client_name',
+            'phone' => 'client_phone',
+            'email' => 'client_email',
+            'cin' => 'client_cin',
+            'address' => 'client_adress',
+        ];
+
+        $dbField = $fieldMapping[$field] ?? null;
+
+        if (!$dbField) {
+            $bot->sendMessage("❌ Champ invalide.");
+            return;
+        }
+
+        try {
+            $oldValue = $client->$dbField;
+            $client->$dbField = $newValue;
+            $client->save();
+
+            $fieldLabels = [
+                'name' => '👤 Nom',
+                'phone' => '📞 Téléphone',
+                'email' => '📧 Email',
+                'cin' => '🆔 CIN',
+                'address' => '📍 Adresse',
+            ];
+
+            $message = "✅ <b>Modification réussie</b>\n\n"
+                . "Client : <b>{$client->client_name}</b>\n\n"
+                . "{$fieldLabels[$field]} :\n"
+                . "Ancien : <code>" . ($oldValue ?? 'Non renseigné') . "</code>\n"
+                . "Nouveau : <code>{$newValue}</code>";
+
+            $keyboard = InlineKeyboardMarkup::make()
+                ->addRow(
+                    InlineKeyboardButton::make('👁️ Voir le client', callback_data: "client_view_{$clientId}"),
+                    InlineKeyboardButton::make('✏️ Modifier autre chose', callback_data: "client_modify_{$clientId}")
+                )
+                ->addRow(
+                    InlineKeyboardButton::make('🔙 Retour au menu', callback_data: 'client_menu')
+                );
+
+            $bot->sendMessage($message, parse_mode: 'HTML', reply_markup: $keyboard);
+
+            // Réinitialiser l'état
+            $bot->deleteGlobalData('editing_client_id');
+            $bot->deleteGlobalData('editing_field');
+
+        } catch (\Exception $e) {
+            $bot->sendMessage("❌ Erreur lors de la modification : " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Basculer le statut du client (actif/inactif)
+     */
+    public static function toggleClientStatus(Nutgram $bot, int $clientId): void
+    {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
+        $client = Client::find($clientId);
+
+        if (!$client) {
+            $bot->answerCallbackQuery("❌ Client non trouvé", show_alert: true);
+            return;
+        }
+
+        $newStatus = $client->client_status === 'active' ? 'inactive' : 'active';
+        $client->client_status = $newStatus;
+        $client->save();
+
+        $statusEmoji = $newStatus === 'active' ? '✅' : '❌';
+        $statusText = $newStatus === 'active' ? 'Actif' : 'Inactif';
+
+        $bot->answerCallbackQuery(text: "✅ Statut changé : {$statusText}");
+
+        $message = "🔄 <b>Statut modifié</b>\n\n"
+            . "Client : <b>{$client->client_name}</b>\n"
+            . "Nouveau statut : {$statusEmoji} <b>{$statusText}</b>";
+
+        $keyboard = InlineKeyboardMarkup::make()
+            ->addRow(
+                InlineKeyboardButton::make('👁️ Voir le client', callback_data: "client_view_{$clientId}"),
+                InlineKeyboardButton::make('✏️ Modifier', callback_data: "client_modify_{$clientId}")
+            )
+            ->addRow(
+                InlineKeyboardButton::make('🔙 Menu clients', callback_data: 'client_menu')
+            );
+
+        $bot->editMessageText($message, parse_mode: 'HTML', reply_markup: $keyboard);
     }
 }
 

@@ -161,7 +161,7 @@ class ArticleCallbackHandler
 
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
-                InlineKeyboardButton::make('✏️ Modifier', callback_data: "article_edit_{$articleId}"),
+                InlineKeyboardButton::make('✏️ Modifier', callback_data: "article_modify_{$articleId}"),
                 InlineKeyboardButton::make('📦 Ajuster stock', callback_data: "article_stock_{$articleId}")
             )
             ->addRow(
@@ -337,7 +337,7 @@ class ArticleCallbackHandler
     }
 
     /**
-     * Démarrer le processus de modification d'un article
+     * Menu de modification d'un article
      */
     public static function editArticle(Nutgram $bot, int $articleId): void
     {
@@ -354,44 +354,108 @@ class ArticleCallbackHandler
 
         $bot->answerCallbackQuery();
 
+        $priceWithTVA = $article->selling_price * (1 + ($article->article_tva ?? 0) / 100);
+
         $message = "✏️ <b>Modifier l'article</b>\n\n"
-            . "📦 <b>Article actuel :</b> {$article->article_name}\n\n"
-            . "Envoyez les nouvelles informations dans ce format :\n\n"
-            . "<code>Nom de l'article\n"
-            . "Prix de vente (FCFA)\n"
-            . "Quantité en stock\n"
-            . "Unité\n"
-            . "Source\n"
-            . "TVA en %</code>\n\n"
-            . "<b>Valeurs actuelles :</b>\n"
-            . "<code>{$article->article_name}\n"
-            . "{$article->selling_price}\n"
-            . "{$article->quantity_stock}\n"
-            . "{$article->article_unité}\n"
-            . "{$article->article_source}\n"
-            . "{$article->article_tva}</code>";
+            . "Article actuel :\n"
+            . "📦 <b>{$article->article_name}</b>\n"
+            . "💰 Prix HT : " . number_format($article->selling_price, 0, ',', ' ') . " FCFA\n"
+            . "💵 TVA : {$article->article_tva}%\n"
+            . "💸 Prix TTC : " . number_format($priceWithTVA, 0, ',', ' ') . " FCFA\n"
+            . "📏 Unité : {$article->article_unité}\n"
+            . "📊 Source : {$article->article_source}\n\n"
+            . "Que souhaitez-vous modifier ?";
 
-        $bot->sendMessage($message, parse_mode: 'HTML');
+        $keyboard = InlineKeyboardMarkup::make()
+            ->addRow(
+                InlineKeyboardButton::make('📦 Nom', callback_data: "article_edit_field_{$articleId}_name"),
+                InlineKeyboardButton::make('💰 Prix', callback_data: "article_edit_field_{$articleId}_price")
+            )
+            ->addRow(
+                InlineKeyboardButton::make('💵 TVA', callback_data: "article_edit_field_{$articleId}_tva"),
+                InlineKeyboardButton::make('📏 Unité', callback_data: "article_edit_field_{$articleId}_unit")
+            )
+            ->addRow(
+                InlineKeyboardButton::make('📊 Source', callback_data: "article_edit_field_{$articleId}_source")
+            )
+            ->addRow(
+                InlineKeyboardButton::make('🔙 Retour', callback_data: "article_view_{$articleId}")
+            );
 
-        // Stocker l'état pour le prochain message
-        $bot->setGlobalData('awaiting_article_edit', $articleId);
-        $bot->setGlobalData('user_telegram_id', $bot->user()->id);
+        $bot->editMessageText($message, parse_mode: 'HTML', reply_markup: $keyboard);
     }
 
     /**
-     * Traiter la modification d'un article
+     * Modifier un champ spécifique de l'article
      */
-    public static function processArticleEdit(Nutgram $bot, int $articleId): void
+    public static function editArticleField(Nutgram $bot, int $articleId, string $field): void
     {
         $user = User::checkTelegramAccess($bot, requireCompany: true);
         if (!$user)
             return;
 
-        $text = trim($bot->message()->text);
-        $lines = array_map('trim', explode("\n", $text));
+        $article = Article::find($articleId);
 
-        if (count($lines) < 6) {
-            $bot->sendMessage("❌ Format incorrect. Veuillez fournir toutes les informations.");
+        if (!$article) {
+            $bot->answerCallbackQuery("❌ Article non trouvé", show_alert: true);
+            return;
+        }
+
+        $bot->answerCallbackQuery();
+
+        $fieldLabels = [
+            'name' => '📦 Nom',
+            'price' => '💰 Prix de vente HT',
+            'tva' => '💵 TVA (%)',
+            'unit' => '📏 Unité',
+            'source' => '📊 Source',
+        ];
+
+        $fieldLabel = $fieldLabels[$field] ?? $field;
+
+        $fieldExamples = [
+            'name' => 'Ordinateur Dell XPS 15',
+            'price' => '850000',
+            'tva' => '18',
+            'unit' => 'pièce',
+            'source' => 'Dell Store',
+        ];
+
+        $example = $fieldExamples[$field] ?? '';
+
+        $message = "✏️ <b>Modifier {$fieldLabel}</b>\n\n"
+            . "📦 Article : <b>{$article->article_name}</b>\n\n"
+            . "Envoyez-moi la nouvelle valeur pour ce champ.\n\n";
+
+        if ($example) {
+            $message .= "<b>Exemple :</b> <code>{$example}</code>\n\n";
+        }
+
+        $message .= "💡 <i>Tapez /cancel pour annuler</i>";
+
+        $bot->sendMessage($message, parse_mode: 'HTML');
+
+        // Stocker l'état pour le prochain message
+        $bot->setGlobalData('editing_article_id', $articleId);
+        $bot->setGlobalData('editing_article_field', $field);
+        $bot->setGlobalData('user_telegram_id', $bot->user()->id);
+    }
+
+    /**
+     * Traiter la modification d'un champ d'article
+     */
+    public static function processArticleFieldEdit(Nutgram $bot): void
+    {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
+        $articleId = $bot->getGlobalData('editing_article_id');
+        $field = $bot->getGlobalData('editing_article_field');
+        $newValue = trim($bot->message()->text);
+
+        if (empty($newValue)) {
+            $bot->sendMessage("❌ La valeur ne peut pas être vide.");
             return;
         }
 
@@ -399,50 +463,75 @@ class ArticleCallbackHandler
 
         if (!$article) {
             $bot->sendMessage("❌ Article non trouvé.");
+            $bot->deleteGlobalData('editing_article_id');
+            $bot->deleteGlobalData('editing_article_field');
             return;
         }
 
-        // Validations
-        if (!is_numeric($lines[1]) || $lines[1] <= 0) {
-            $bot->sendMessage("❌ Le prix de vente doit être un nombre positif.");
+        // Validation selon le champ
+        $validation = self::validateArticleField($field, $newValue);
+        if (!$validation['valid']) {
+            $bot->sendMessage("❌ {$validation['message']}");
             return;
         }
 
-        if (!is_numeric($lines[2]) || $lines[2] < 0) {
-            $bot->sendMessage("❌ La quantité en stock doit être un nombre positif ou zéro.");
+        // Mapper les noms de champs aux colonnes de la base de données
+        $fieldMapping = [
+            'name' => 'article_name',
+            'price' => 'selling_price',
+            'tva' => 'article_tva',
+            'unit' => 'article_unité',
+            'source' => 'article_source',
+        ];
+
+        $dbField = $fieldMapping[$field] ?? null;
+
+        if (!$dbField) {
+            $bot->sendMessage("❌ Champ invalide.");
             return;
         }
-
-        $tva = is_numeric($lines[5]) ? (float) $lines[5] : 0;
-        if ($tva < 0 || $tva > 100) {
-            $bot->sendMessage("❌ La TVA doit être entre 0 et 100%.");
-            return;
-        }
-
-        $user = User::where('telegram_id', $bot->user()->id)->first();
 
         try {
-            $article->update([
-                'article_name' => $lines[0],
-                'selling_price' => (float) $lines[1],
-                'quantity_stock' => (int) $lines[2],
-                'article_unité' => $lines[3],
-                'article_source' => $lines[4],
-                'article_tva' => $tva,
-                'company_id' => $user->company_id,
-            ]);
+            $oldValue = $article->$dbField;
 
-            $priceWithTVA = $article->selling_price * (1 + $article->article_tva / 100);
+            // Convertir en nombre si nécessaire
+            if (in_array($field, ['price', 'tva'])) {
+                $newValue = (float) $newValue;
+            }
 
-            $message = "✅ <b>Article modifié avec succès !</b>\n\n"
-                . "📦 <b>{$article->article_name}</b>\n"
-                . "💰 Prix HT : " . number_format($article->selling_price, 0, ',', ' ') . " FCFA\n"
-                . "💸 Prix TTC : " . number_format($priceWithTVA, 0, ',', ' ') . " FCFA\n"
-                . "📦 Stock : {$article->quantity_stock} {$article->article_unité}";
+            $article->$dbField = $newValue;
+            $article->save();
+
+            $fieldLabels = [
+                'name' => '📦 Nom',
+                'price' => '💰 Prix HT',
+                'tva' => '💵 TVA',
+                'unit' => '📏 Unité',
+                'source' => '📊 Source',
+            ];
+
+            // Formater l'affichage selon le type
+            $oldValueDisplay = $oldValue;
+            $newValueDisplay = $newValue;
+
+            if ($field === 'price') {
+                $oldValueDisplay = number_format($oldValue, 0, ',', ' ') . ' FCFA';
+                $newValueDisplay = number_format($newValue, 0, ',', ' ') . ' FCFA';
+            } elseif ($field === 'tva') {
+                $oldValueDisplay = $oldValue . '%';
+                $newValueDisplay = $newValue . '%';
+            }
+
+            $message = "✅ <b>Modification réussie</b>\n\n"
+                . "📦 Article : <b>{$article->article_name}</b>\n\n"
+                . "{$fieldLabels[$field]} :\n"
+                . "Ancien : <code>" . ($oldValueDisplay ?? 'Non renseigné') . "</code>\n"
+                . "Nouveau : <code>{$newValueDisplay}</code>";
 
             $keyboard = InlineKeyboardMarkup::make()
                 ->addRow(
-                    InlineKeyboardButton::make('📦 Voir l\'article', callback_data: "article_view_{$article->article_id}")
+                    InlineKeyboardButton::make('📦 Voir l\'article', callback_data: "article_view_{$articleId}"),
+                    InlineKeyboardButton::make('✏️ Modifier autre chose', callback_data: "article_modify_{$articleId}")
                 )
                 ->addRow(
                     InlineKeyboardButton::make('🔙 Liste des articles', callback_data: 'article_list')
@@ -450,11 +539,68 @@ class ArticleCallbackHandler
 
             $bot->sendMessage($message, parse_mode: 'HTML', reply_markup: $keyboard);
 
-            $bot->deleteGlobalData('awaiting_article_edit');
+            // Réinitialiser l'état
+            $bot->deleteGlobalData('editing_article_id');
+            $bot->deleteGlobalData('editing_article_field');
 
         } catch (\Exception $e) {
             $bot->sendMessage("❌ Erreur lors de la modification : " . $e->getMessage());
         }
+    }
+
+    /**
+     * Valider un champ d'article
+     */
+    private static function validateArticleField(string $field, string $value): array
+    {
+        switch ($field) {
+            case 'price':
+                if (!is_numeric($value) || $value <= 0) {
+                    return [
+                        'valid' => false,
+                        'message' => 'Le prix doit être un nombre positif. Exemple: 850000'
+                    ];
+                }
+                break;
+
+            case 'tva':
+                if (!is_numeric($value) || $value < 0 || $value > 100) {
+                    return [
+                        'valid' => false,
+                        'message' => 'La TVA doit être un nombre entre 0 et 100. Exemple: 18'
+                    ];
+                }
+                break;
+
+            case 'name':
+                if (strlen($value) < 2) {
+                    return [
+                        'valid' => false,
+                        'message' => 'Le nom doit contenir au moins 2 caractères'
+                    ];
+                }
+                break;
+
+            case 'unit':
+                if (strlen($value) < 1) {
+                    return [
+                        'valid' => false,
+                        'message' => 'L\'unité ne peut pas être vide. Exemples: pièce, kg, litre'
+                    ];
+                }
+                break;
+
+            case 'source':
+                if (strlen($value) < 2) {
+                    return [
+                        'valid' => false,
+                        'message' => 'La source doit contenir au moins 2 caractères'
+                    ];
+                }
+                break;
+        }
+
+        return ['valid' => true];
     }
 
     /**
@@ -938,43 +1084,118 @@ class ArticleCallbackHandler
 
         $bot->answerCallbackQuery();
     }
-}
 
-/**
- * Handler pour les messages en attente de données article
- */
-class ArticleMessageHandler
-{
-    public function handle(Nutgram $bot): void
+    /**
+     * Rechercher un article
+     */
+    public static function searchArticle(Nutgram $bot): void
     {
-        // Ajout d'un nouvel article
-        if ($bot->getGlobalData('awaiting_article_data')) {
-            ArticleCallbackHandler::processArticleData($bot);
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
+        $bot->answerCallbackQuery();
+
+        $message = "🔍 <b>Rechercher un article</b>\n\n"
+            . "Envoyez-moi le nom, référence ou source de l'article à rechercher.\n\n"
+            . "💡 <i>Tapez /cancel pour annuler</i>";
+
+        $bot->sendMessage($message, parse_mode: 'HTML');
+
+        $bot->setGlobalData('awaiting_article_search', true);
+        $bot->setGlobalData('user_telegram_id', $bot->user()->id);
+    }
+
+    /**
+     * Traiter la recherche d'article
+     */
+    public static function processArticleSearch(Nutgram $bot): void
+    {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
+        $query = trim($bot->message()->text);
+
+        if (empty($query)) {
+            $bot->sendMessage("❌ Veuillez entrer un terme de recherche valide.");
             return;
         }
 
-        // Modification d'un article
-        if ($articleId = $bot->getGlobalData('awaiting_article_edit')) {
-            ArticleCallbackHandler::processArticleEdit($bot, $articleId);
+        $user = User::where('telegram_id', $bot->user()->id)->first();
+
+        if (!$user) {
+            $bot->sendMessage("❌ Erreur : utilisateur non trouvé.");
             return;
         }
 
-        // Ajout de stock
-        if ($articleId = $bot->getGlobalData('awaiting_stock_add')) {
-            ArticleCallbackHandler::processStockAdd($bot, $articleId);
+        $articles = Article::where('user_id', $user->id)
+            ->where(function ($q) use ($query) {
+                $q->whereRaw('LOWER(article_name) LIKE ?', ['%' . strtolower($query) . '%'])
+                    ->orWhereRaw('LOWER(article_reference) LIKE ?', ['%' . strtolower($query) . '%'])
+                    ->orWhereRaw('LOWER(article_source) LIKE ?', ['%' . strtolower($query) . '%'])
+                    ->orWhereRaw('LOWER(article_unité) LIKE ?', ['%' . strtolower($query) . '%']);
+            })
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        if ($articles->isEmpty()) {
+            $keyboard = InlineKeyboardMarkup::make()
+                ->addRow(
+                    InlineKeyboardButton::make('🔙 Retour au menu', callback_data: 'article_menu')
+                );
+
+            $bot->sendMessage(
+                "❌ <b>Aucun résultat</b>\n\n"
+                . "Aucun article trouvé pour : <code>{$query}</code>\n\n"
+                . "💡 Vérifiez l'orthographe ou essayez avec un autre terme.",
+                parse_mode: 'HTML',
+                reply_markup: $keyboard
+            );
+
+            $bot->deleteGlobalData('awaiting_article_search');
             return;
         }
 
-        // Retrait de stock
-        if ($articleId = $bot->getGlobalData('awaiting_stock_remove')) {
-            ArticleCallbackHandler::processStockRemove($bot, $articleId);
-            return;
+        $totalStock = $articles->sum('quantity_stock');
+        $totalValue = $articles->sum(function ($article) {
+            return $article->quantity_stock * $article->selling_price;
+        });
+
+        $message = "🔍 <b>Résultats de recherche</b>\n\n"
+            . "Recherche : <code>{$query}</code>\n"
+            . "📊 {$articles->count()} résultat(s) trouvé(s)\n"
+            . "📦 Stock total : {$totalStock} unités\n"
+            . "💎 Valeur totale : " . number_format($totalValue, 0, ',', ' ') . " FCFA\n\n";
+
+        $keyboard = InlineKeyboardMarkup::make();
+
+        foreach ($articles as $article) {
+            $stockEmoji = $article->quantity_stock > 0 ? '✅' : '⚠️';
+            $stockInfo = $article->quantity_stock > 0
+                ? "Stock: {$article->quantity_stock}"
+                : "Rupture";
+
+            $keyboard->addRow(
+                InlineKeyboardButton::make(
+                    "{$stockEmoji} {$article->article_name} ({$stockInfo})",
+                    callback_data: "article_view_{$article->article_id}"
+                )
+            );
         }
 
-        // Remplacement de stock
-        if ($articleId = $bot->getGlobalData('awaiting_stock_replace')) {
-            ArticleCallbackHandler::processStockReplace($bot, $articleId);
-            return;
-        }
+        $keyboard->addRow(
+            InlineKeyboardButton::make('🔍 Nouvelle recherche', callback_data: 'article_search'),
+            InlineKeyboardButton::make('🔙 Menu', callback_data: 'article_menu')
+        );
+
+        $bot->sendMessage(
+            text: $message . "Sélectionnez un article :",
+            parse_mode: 'HTML',
+            reply_markup: $keyboard
+        );
+
+        $bot->deleteGlobalData('awaiting_article_search');
     }
 }
