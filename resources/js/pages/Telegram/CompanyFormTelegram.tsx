@@ -1,3 +1,5 @@
+// resources/js/Pages/Telegram/CompanyFormTelegram.tsx
+
 import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
@@ -63,7 +65,11 @@ interface FormErrors {
     company_address?: string;
 }
 
-export default function CompanyFormTelegram() {
+interface CompanyFormTelegramProps {
+    telegram_id?: number;
+}
+
+export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegramProps) {
     const [formData, setFormData] = useState<FormData>({
         company_name: '',
         company_email: '',
@@ -75,7 +81,7 @@ export default function CompanyFormTelegram() {
 
     const [errors, setErrors] = useState<FormErrors>({});
     const [isLoading, setIsLoading] = useState(false);
-    const [tg, setTg] = useState<any>(null);
+    const [tg, setTg] = useState<NonNullable<typeof window.Telegram>['WebApp'] | null>(null);
 
     useEffect(() => {
         const telegram = window.Telegram?.WebApp;
@@ -99,16 +105,17 @@ export default function CompanyFormTelegram() {
             telegram.MainButton.show();
 
             // Gestionnaire du bouton
-            telegram.MainButton.onClick(handleSubmit);
+            const handleSubmitWrapper = () => handleSubmit();
+            telegram.MainButton.onClick(handleSubmitWrapper);
 
             return () => {
-                telegram.MainButton.offClick(handleSubmit);
+                telegram.MainButton.offClick(handleSubmitWrapper);
                 telegram.MainButton.hide();
             };
         } else {
             console.warn('Telegram WebApp non disponible');
         }
-    }, [formData]);
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;

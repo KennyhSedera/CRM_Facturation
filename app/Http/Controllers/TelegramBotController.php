@@ -2,77 +2,69 @@
 
 namespace App\Http\Controllers;
 
+use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
+use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
 use Illuminate\Http\Request;
-use Telegram\Bot\Laravel\Facades\Telegram;
-use App\Services\CallbackService;
+use App\Models\FormSubmission;
+use Illuminate\Support\Facades\Log;
 
 class TelegramBotController extends Controller
 {
-    protected $callbackService;
-
-    public function __construct(CallbackService $callbackService)
-    {
-        $this->callbackService = $callbackService;
-    }
-
     public function handle(Request $request)
     {
-        $data = $request->all();
-        $callback = $data['callback_query'] ?? null;
-        $message = $data['message'] ?? null;
+        $bot = new Nutgram(config('services.telegram.bot_token'));
 
-        // ✅ PRIORITÉ 1: Traiter les callbacks EN PREMIER
-        if ($callback) {
-            $this->callbackService->handleCallback($callback);
-            return response('ok', 200); // ← ARRÊT ICI !
-        }
+        // Commande /start - Affiche le bouton du formulaire
+        $bot->onCommand('start', function (Nutgram $bot) {
+            $webAppUrl = route('webapp.form', ['user_id' => $bot->userId()]);
 
-        // ✅ PRIORITÉ 2: Traiter les messages transférés
-        if ($message && $this->handleForwardedMessage($message)) {
-            return response('ok', 200);
-        }
+            $keyboard = InlineKeyboardMarkup::make()
+                ->addRow(
+                    InlineKeyboardButton::make(
+                        text: '📝 Remplir le formulaire',
+                        web_app: new WebAppInfo($webAppUrl)
+                    )
+                );
 
-        // ✅ PRIORITÉ 3: Traiter les commandes normales
-        if ($message && isset($message['text']) && str_starts_with($message['text'], '/')) {
-            Telegram::commandsHandler(true);
-            return response('ok', 200);
-        }
+            $bot->sendMessage(
+                text: "👋 Bienvenue !\n\nCliquez sur le bouton ci-dessous pour remplir le formulaire :",
+                reply_markup: $keyboard
+            );
+        });
 
-        // ✅ PRIORITÉ 4: Traiter les messages texte pour la recherche
-        if ($message && isset($message['text'])) {
-            $this->handleTextMessage($message);
-        }
+        // Réception des données du Web App
+        $bot->onMessage(function (Nutgram $bot) {
+            if ($bot->message()->web_app_data) {
+                $data = json_decode($bot->message()->web_app_data->data, true);
 
-        return response('ok', 200);
-    }
+                // Sauvegarder en base de données
+                Log::info('Form submission received', [
+                    'user_id' => $bot->userId(),
+                    'nom' => $data['nom'],
+                    'email' => $data['email'],
+                    'telephone' => $data['telephone'] ?? null,
+                    'message' => $data['message'],
+                    'submitted_at' => now(),
+                ]);
 
-    private function handleForwardedMessage(array $message)
-    {
-        $chatId = $message['chat']['id'] ?? null;
+                // Envoyer une confirmation
+                $bot->sendMessage(
+                    text: "✅ Formulaire reçu avec succès !\n\n" .
+                    "📝 Récapitulatif :\n" .
+                    "━━━━━━━━━━━━━━━\n" .
+                    "👤 Nom : {$data['nom']}\n" .
+                    "📧 Email : {$data['email']}\n" .
+                    "📱 Téléphone : " . ($data['telephone'] ?? 'Non renseigné') . "\n" .
+                    "💬 Message : {$data['message']}\n\n" .
+                    "Nous vous recontacterons bientôt ! 🚀"
+                );
+            }
+        });
 
-        // Vérifier si le message est transféré
-        if (isset($message['forward_from']) || isset($message['forward_from_chat'])) {
-            $getMyIdCommand = new \App\Telegram\Commands\GetMyIdCommand();
+        $bot->run();
 
-            // Simuler un update pour la commande
-            $update = Telegram::getWebhookUpdate();
-            $getMyIdCommand->setUpdate($update);
-
-            return $getMyIdCommand->handleForwardedMessage($message, $chatId);
-        }
-
-        return false;
-    }
-
-    private function handleTextMessage(array $message)
-    {
-        $chatId = $message['chat']['id'] ?? null;
-        $text = $message['text'] ?? '';
-
-        // Si c'est un message texte normal (pas une commande), on fait une recherche globale
-        if (!empty($text) && $chatId && !str_starts_with($text, '/')) {
-            $searchCommand = new \App\Telegram\Commands\RechercheCommand();
-            $searchCommand->searchGlobal($text, $chatId);
-        }
+        return response()->json(['status' => 'ok']);
     }
 }

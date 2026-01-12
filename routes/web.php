@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\WebAppController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -19,6 +20,7 @@ Route::get('/company/form/telegram', function () {
     return Inertia::render('company/company-form-telegram');
 })->name('form.telegram');
 
+Route::get('/webapp/form', [WebAppController::class, 'form'])->name('webapp.form');
 // ============================================
 // ROUTES AUTHENTIFIÉES (tous les utilisateurs)
 // ============================================
