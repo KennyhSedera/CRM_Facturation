@@ -1,7 +1,7 @@
 // resources/js/Pages/Telegram/CompanyFormTelegram.tsx
 
 import { Head } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // Définir le type pour Telegram WebApp
 declare global {
@@ -84,6 +84,14 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
     const [tg, setTg] = useState<NonNullable<typeof window.Telegram>['WebApp'] | null>(null);
     const [showFallbackButton, setShowFallbackButton] = useState(false);
 
+    // Référence pour toujours avoir les dernières données
+    const formDataRef = useRef(formData);
+
+    // Mettre à jour la référence quand formData change
+    useEffect(() => {
+        formDataRef.current = formData;
+    }, [formData]);
+
     useEffect(() => {
         const telegram = window.Telegram?.WebApp;
 
@@ -105,8 +113,11 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
             telegram.MainButton.textColor = telegram.themeParams?.button_text_color || '#ffffff';
             telegram.MainButton.show();
 
-            // Gestionnaire du bouton
-            const handleSubmitWrapper = () => handleSubmit();
+            // Handler qui utilise la référence
+            const handleSubmitWrapper = () => {
+                handleSubmitAction();
+            };
+
             telegram.MainButton.onClick(handleSubmitWrapper);
 
             // Vérifier si le MainButton s'affiche après 1 seconde
@@ -140,70 +151,77 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
         }
     };
 
-    const validateForm = (): boolean => {
+    const validateFormData = (data: FormData): FormErrors => {
         const newErrors: FormErrors = {};
 
         // Validation du nom
-        if (!formData.company_name.trim()) {
+        if (!data.company_name.trim()) {
             newErrors.company_name = "Le nom de l'entreprise est requis";
-        } else if (formData.company_name.trim().length < 2) {
+        } else if (data.company_name.trim().length < 2) {
             newErrors.company_name = 'Le nom doit contenir au moins 2 caractères';
         }
 
         // Validation de l'email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!formData.company_email.trim()) {
+        if (!data.company_email.trim()) {
             newErrors.company_email = "L'email est requis";
-        } else if (!emailRegex.test(formData.company_email)) {
+        } else if (!emailRegex.test(data.company_email)) {
             newErrors.company_email = "L'email doit être valide";
         }
 
         // Validation de la description
-        if (!formData.company_description.trim()) {
+        if (!data.company_description.trim()) {
             newErrors.company_description = 'La description est requise';
-        } else if (formData.company_description.trim().length < 10) {
+        } else if (data.company_description.trim().length < 10) {
             newErrors.company_description = 'La description doit contenir au moins 10 caractères';
         }
 
         // Validation du téléphone
-        if (!formData.company_phone.trim()) {
+        if (!data.company_phone.trim()) {
             newErrors.company_phone = 'Le téléphone est requis';
-        } else if (formData.company_phone.trim().length < 8) {
+        } else if (data.company_phone.trim().length < 8) {
             newErrors.company_phone = 'Le téléphone doit contenir au moins 8 caractères';
         }
 
         // Validation de l'adresse
-        if (!formData.company_address.trim()) {
+        if (!data.company_address.trim()) {
             newErrors.company_address = "L'adresse est requise";
-        } else if (formData.company_address.trim().length < 5) {
+        } else if (data.company_address.trim().length < 5) {
             newErrors.company_address = "L'adresse doit contenir au moins 5 caractères";
         }
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        return newErrors;
     };
 
-    const handleSubmit = () => {
-        console.log('=== DÉBUT SUBMIT ===');
-        console.log('TG disponible?', !!tg);
-        console.log('FormData:', formData);
+    const handleSubmitAction = () => {
+        // Utiliser formDataRef.current pour avoir les données à jour
+        const currentData = formDataRef.current;
 
-        // if (!validateForm()) {
-        //     console.log('Validation échouée');
-        //     if (tg) {
-        //         tg.showAlert('⚠️ Veuillez corriger les erreurs dans le formulaire');
-        //     } else {
-        //         alert('⚠️ Veuillez corriger les erreurs dans le formulaire');
-        //     }
-        //     return;
-        // }
+        console.log('=== SUBMIT ===');
+        console.log('TG disponible?', !!tg);
+        console.log('Données actuelles:', currentData);
+
+        // Valider les données
+        const validationErrors = validateFormData(currentData);
+
+        if (Object.keys(validationErrors).length > 0) {
+            console.log('Erreurs de validation:', validationErrors);
+            setErrors(validationErrors);
+
+            if (tg) {
+                tg.showAlert('⚠️ Veuillez corriger les erreurs dans le formulaire');
+            } else {
+                alert('⚠️ Veuillez corriger les erreurs dans le formulaire');
+            }
+            return;
+        }
 
         console.log('Validation OK, envoi des données...');
         setIsLoading(true);
         tg?.MainButton.showProgress();
 
         try {
-            const dataToSend = JSON.stringify(formData);
+            const dataToSend = JSON.stringify(currentData);
             console.log('Données à envoyer:', dataToSend);
 
             if (tg) {
@@ -230,6 +248,10 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
             tg?.MainButton.hideProgress();
             setIsLoading(false);
         }
+    };
+
+    const handleSubmit = () => {
+        handleSubmitAction();
     };
 
     return (
@@ -425,6 +447,36 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                             </span>
                         </p>
                     </div>
+
+                    {/* BOUTON DE SECOURS */}
+                    {showFallbackButton && (
+                        <div className="fixed right-0 bottom-0 left-0 border-t-2 border-gray-200 bg-white p-4 shadow-lg">
+                            <button
+                                onClick={handleSubmit}
+                                disabled={isLoading}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-500 px-6 py-4 font-bold text-white transition-colors hover:bg-blue-600 active:bg-blue-700 disabled:bg-gray-400"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            />
+                                        </svg>
+                                        <span>Création en cours...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>✅</span>
+                                        <span>Créer l'entreprise</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </>
