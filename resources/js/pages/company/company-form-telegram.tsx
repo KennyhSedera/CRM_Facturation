@@ -21,7 +21,10 @@ export default function CompabyFormTelegram() {
 
     useEffect(() => {
         if (window.Telegram?.WebApp) {
+            console.log('WebApp ready', window.Telegram.WebApp);
             window.Telegram.WebApp.expand();
+        } else {
+            console.warn('WebApp non disponible !');
         }
     }, []);
 

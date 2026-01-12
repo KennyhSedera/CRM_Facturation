@@ -25,6 +25,7 @@ use App\Telegram\Handlers\TextHandler;
 use SergiX44\Nutgram\Telegram\Properties\ParseMode;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
+use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppData;
 use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
 
 /*
@@ -66,14 +67,14 @@ $bot->onCommand('formulaire', function (Nutgram $bot) {
     );
 });
 
-$bot->onWebAppData(function (Nutgram $bot, $data) {
-    $payload = json_decode($data->data, true);
+$bot->onWebAppData(function (Nutgram $bot, WebAppData $webAppData) {
+    Log::info("WebAppData reçu", ['raw' => $webAppData]);
 
+    $payload = json_decode($webAppData->data, true);
     $email = $payload['email'] ?? null;
     $phone = $payload['phone'] ?? null;
 
-    // Exemple : stocker en DB
-    Log::info('Web app form data received', [
+    Log::info('Web app form data decoded', [
         'email' => $email,
         'phone' => $phone,
     ]);
