@@ -54,7 +54,9 @@ export default function CompabyFormTelegram() {
                 onChange={(e) => setPhone(e.target.value)}
                 style={{ display: 'block', marginBottom: 10, width: '100%' }}
             />
-            <button onClick={handleSubmit}>Valider ✅</button>
+            <button className="bg-blue-500 text-white" onClick={handleSubmit}>
+                Valider ✅
+            </button>
         </div>
     );
 }
