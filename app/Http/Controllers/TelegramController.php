@@ -45,12 +45,13 @@ class TelegramController extends Controller
             'plan_status' => 'nullable|string|max:50',
             'plan_start_date' => 'nullable|date',
             'plan_end_date' => 'nullable|date|after_or_equal:plan_start_date',
+            'company_currency' => 'nullable|string|max:10',
+            'company_timezone' => 'nullable|string|max:50',
         ]);
 
         if ($validator->fails()) {
             Log::error("Validation failed", ['errors' => $validator->errors()]);
 
-            // Envoyer un message d'erreur à l'utilisateur Telegram
             $bot->sendMessage(
                 text: "❌ <b>Erreur de validation</b>\n\n" .
                 implode("\n", $validator->errors()->all()),
@@ -69,6 +70,11 @@ class TelegramController extends Controller
 
         try {
             $validated = $validator->validated();
+            $validated['is_active'] = $validated['is_active'] ?? true;
+            $validated['plan_status'] = $validated['plan_status'] ?? 'free';
+
+            $validated['company_timezone'] = $validated['company_timezone'] ?? 'UTC';
+            $validated['company_currency'] = $validated['company_currency'] ?? 'FCFA';
 
             $company = Company::create($validated);
 
