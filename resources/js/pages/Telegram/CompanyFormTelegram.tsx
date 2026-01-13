@@ -241,12 +241,11 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                                     }
                                 });
                             } else if (data.message) {
-                                errorMessage += data.message;
+                                telegramApp.showAlert('Erreur : ' + data.message);
                             } else {
-                                errorMessage += 'Erreur inconnue';
+                                telegramApp.showAlert('Erreur inconnue');
                             }
 
-                            telegramApp.showAlert(errorMessage);
                             setIsLoading(false);
                             telegramApp.MainButton.hideProgress();
                         }

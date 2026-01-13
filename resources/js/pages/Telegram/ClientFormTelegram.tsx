@@ -101,7 +101,7 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
             document.body.style.backgroundColor = telegram.themeParams?.bg_color || '#ffffff';
             document.body.style.color = telegram.themeParams?.text_color || '#000000';
 
-            telegram.MainButton.setText("✅ Créer l'entreprise");
+            telegram.MainButton.setText('✅ Créer le client');
             telegram.MainButton.color = telegram.themeParams?.button_color || '#3390ec';
             telegram.MainButton.textColor = telegram.themeParams?.button_text_color || '#ffffff';
             telegram.MainButton.show();
@@ -198,8 +198,6 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
                                 telegramApp.close();
                             }, 1000);
                         } else {
-                            let errorMessage = '❌ Erreur:\n\n';
-
                             if (data.errors && typeof data.errors === 'object') {
                                 Object.keys(data.errors).forEach((field) => {
                                     const messages = data.errors[field];
@@ -208,22 +206,19 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
                                             ...prev,
                                             [field]: messages.join(', '),
                                         }));
-                                        // errorMessage += `• ${field}: ${messages.join(', ')}\n`;
                                     } else {
                                         setErrors((prev) => ({
                                             ...prev,
                                             [field]: messages,
                                         }));
-                                        // errorMessage += `• ${field}: ${messages}\n`;
                                     }
                                 });
                             } else if (data.message) {
-                                errorMessage += data.message;
+                                telegramApp.showAlert('Erreur : ' + data.message);
                             } else {
-                                errorMessage += 'Erreur inconnue';
+                                telegramApp.showAlert('Erreur inconnue');
                             }
 
-                            telegramApp.showAlert(errorMessage);
                             setIsLoading(false);
                             telegramApp.MainButton.hideProgress();
                         }
