@@ -191,7 +191,7 @@ class Client extends Model
         return $info;
     }
 
-    public function getMaxClients(string $plan): int
+    public static function getMaxClients(string $plan): int
     {
         $limits = [
             'free' => 3,
