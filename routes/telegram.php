@@ -557,6 +557,10 @@ $bot->onCallbackQueryData('menu_settings', function (Nutgram $bot) {
 $bot->onCommand('createcompany', function (Nutgram $bot) {
     $telegramUser = $bot->user();
 
+    $user = User::checkTelegramAccess($bot, requireCompany: true);
+    if (!$user)
+        return;
+
     $user = User::where('telegram_id', $telegramUser->id)->first();
 
     if ($user && $user->company_id) {
@@ -584,69 +588,6 @@ $bot->onCommand('createcompany', function (Nutgram $bot) {
         parse_mode: ParseMode::HTML,
         reply_markup: $keyboard
     );
-});
-
-// ✅ AJOUTER ce handler pour recevoir les données du WebApp
-$bot->onWebAppData(function (Nutgram $bot, WebAppData $webAppData) {
-    \Log::info("WebAppData reçu", [
-        'raw' => $webAppData->data,
-        'user_id' => $bot->userId()
-    ]);
-
-    try {
-        $payload = json_decode($webAppData->data, true);
-
-        if (!$payload) {
-            throw new \Exception('Données invalides');
-        }
-
-        // Stocker les données dans le cache du bot
-        $bot->setUserData('company_name', $payload['company_name']);
-        $bot->setUserData('company_email', $payload['company_email']);
-        $bot->setUserData('company_description', $payload['company_description']);
-        $bot->setUserData('company_phone', $payload['company_phone']);
-        $bot->setUserData('company_website', $payload['company_website'] ?? null);
-        $bot->setUserData('company_address', $payload['company_address']);
-
-        \Log::info('Données entreprise reçues', [
-            'company_name' => $payload['company_name'],
-            'user_id' => $bot->userId()
-        ]);
-
-        // Afficher le choix du plan
-        $message = "✅ <b>Informations reçues !</b>\n\n"
-            . "🏢 <b>" . htmlspecialchars($payload['company_name']) . "</b>\n"
-            . "📧 " . htmlspecialchars($payload['company_email']) . "\n"
-            . "📱 " . htmlspecialchars($payload['company_phone']) . "\n\n"
-            . "Choisissez votre plan d'abonnement :";
-
-        $keyboard = InlineKeyboardMarkup::make()
-            ->addRow(
-                InlineKeyboardButton::make('🆓 Gratuit (0 FCFA)', callback_data: 'plan:free'),
-                InlineKeyboardButton::make('⭐ Premium (9.900 FCFA)', callback_data: 'plan:premium')
-            )
-            ->addRow(
-                InlineKeyboardButton::make('🏢 Entreprise (14.900 FCFA)', callback_data: 'plan:entreprise')
-            );
-
-        $bot->sendMessage(
-            text: $message,
-            parse_mode: ParseMode::HTML,
-            reply_markup: $keyboard
-        );
-
-    } catch (\Exception $e) {
-        \Log::error('Erreur traitement WebApp: ' . $e->getMessage(), [
-            'user_id' => $bot->userId(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        $bot->sendMessage(
-            text: "❌ <b>Erreur lors de la réception des données</b>\n\n" .
-            "Veuillez réessayer avec /createcompany",
-            parse_mode: ParseMode::HTML
-        );
-    }
 });
 
 /*
