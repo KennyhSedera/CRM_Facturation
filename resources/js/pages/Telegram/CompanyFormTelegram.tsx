@@ -54,6 +54,7 @@ interface FormData {
     company_phone: string;
     company_website: string;
     company_address: string;
+    plan_status: string;
 }
 
 interface FormErrors {
@@ -62,6 +63,7 @@ interface FormErrors {
     company_description?: string;
     company_phone?: string;
     company_address?: string;
+    plan_status?: string;
 }
 
 interface CompanyFormTelegramProps {
@@ -76,6 +78,7 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
         company_phone: '',
         company_website: '',
         company_address: '',
+        plan_status: 'free',
     });
 
     const [errors, setErrors] = useState<FormErrors>({});
@@ -97,8 +100,6 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
 
     useEffect(() => {
         const telegram = window.Telegram?.WebApp;
-
-        console.log('Telegram WebApp disponible:', !!telegram);
 
         if (telegram) {
             setTg(telegram);
@@ -135,7 +136,6 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                 telegram.MainButton.hide();
             };
         } else {
-            console.warn('Telegram WebApp non disponible');
             setShowFallbackButton(true);
         }
     }, []);
@@ -203,7 +203,6 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
         const validationErrors = validateFormData(currentData);
 
         if (Object.keys(validationErrors).length > 0) {
-            console.log('Erreurs de validation:', validationErrors);
             setErrors(validationErrors);
 
             if (telegramApp) {
@@ -218,8 +217,8 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
         telegramApp?.MainButton.showProgress();
 
         try {
+            currentData.plan_status = 'free';
             const dataToSend = JSON.stringify(currentData);
-            console.log('Données à envoyer:', dataToSend);
 
             if (telegramApp) {
                 const userId = telegramApp.initDataUnsafe?.user?.id || telegram_id;
@@ -234,29 +233,23 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                 })
                     .then((response) => response.json())
                     .then((data) => {
-                        console.log('Données envoyées:', data);
                         alert('✅ Entreprise créée!\n\nDonnées: ' + dataToSend);
                         setIsLoading(false);
                     })
                     .catch((error) => {
-                        console.error("Erreur lors de l'envoi:", error);
                         telegramApp.showAlert('❌ Une erreur est survenue: ' + error);
                         telegramApp.MainButton.hideProgress();
                         setIsLoading(false);
                     });
 
                 setTimeout(() => {
-                    console.log('Fermeture de la WebApp');
                     telegramApp.close();
                 }, 2000);
             } else {
-                console.log('Mode fallback - Données:', dataToSend);
                 alert('✅ Entreprise créée! (Mode test)\n\nDonnées: ' + dataToSend);
                 setIsLoading(false);
             }
         } catch (error) {
-            console.error("Erreur lors de l'envoi:", error);
-
             if (telegramApp) {
                 telegramApp.showAlert('❌ Une erreur est survenue: ' + error);
                 telegramApp.MainButton.hideProgress();

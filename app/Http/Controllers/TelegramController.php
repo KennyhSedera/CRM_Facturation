@@ -42,6 +42,7 @@ class TelegramController extends Controller
             'company_address' => 'nullable|string|max:500',
             'company_description' => 'nullable|string',
             'is_active' => 'boolean',
+            'plan_status' => 'nullable|string|max:50',
         ]);
 
         if ($validator->fails()) {
