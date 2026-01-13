@@ -195,13 +195,6 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
             newErrors.company_phone = 'Le téléphone doit contenir au moins 8 caractères';
         }
 
-        // Validation de l'adresse
-        if (!data.company_address.trim()) {
-            newErrors.company_address = "L'adresse est requise";
-        } else if (data.company_address.trim().length < 5) {
-            newErrors.company_address = "L'adresse doit contenir au moins 5 caractères";
-        }
-
         return newErrors;
     };
 
