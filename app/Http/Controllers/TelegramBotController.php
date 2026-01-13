@@ -18,7 +18,7 @@ class TelegramBotController extends Controller
 
         // Commande /start - Affiche le bouton du formulaire
         $bot->onCommand('start', function (Nutgram $bot) {
-            $webAppUrl = route('webapp.form', ['user_id' => $bot->userId()]);
+            $webAppUrl = route('webapp.form.company', ['user_id' => $bot->userId()]);
 
             $keyboard = InlineKeyboardMarkup::make()
                 ->addRow(

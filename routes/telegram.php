@@ -82,13 +82,13 @@ $bot->onCommand('createclient', function (Nutgram $bot) {
     $keyboard = InlineKeyboardMarkup::make()
         ->addRow(
             InlineKeyboardButton::make(
-                text: '📝 Créer mon entreprise',
+                text: '📝 Ajouter un client',
                 web_app: new WebAppInfo($webAppUrl)
             )
         );
 
     $bot->sendMessage(
-        text: "🏢 <b>Créer votre entreprise</b>\n\n" .
+        text: "🏢 <b>Ajouter un client</b>\n\n" .
         "Cliquez sur le bouton ci-dessous pour remplir le formulaire 👇",
         parse_mode: ParseMode::HTML,
         reply_markup: $keyboard

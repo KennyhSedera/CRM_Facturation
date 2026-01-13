@@ -229,9 +229,15 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                                 Object.keys(data.errors).forEach((field) => {
                                     const messages = data.errors[field];
                                     if (Array.isArray(messages)) {
-                                        errorMessage += `• ${field}: ${messages.join(', ')}\n`;
+                                        setErrors((prev) => ({
+                                            ...prev,
+                                            [field]: messages.join(', '),
+                                        }));
                                     } else {
-                                        errorMessage += `• ${field}: ${messages}\n`;
+                                        setErrors((prev) => ({
+                                            ...prev,
+                                            [field]: messages,
+                                        }));
                                     }
                                 });
                             } else if (data.message) {

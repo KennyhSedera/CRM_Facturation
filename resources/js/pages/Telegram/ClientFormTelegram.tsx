@@ -374,7 +374,8 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
                             <label htmlFor="client_address" className="mb-2 block text-sm font-semibold">
                                 Adresse du client
                             </label>
-                            <textarea
+                            <input
+                                type="text"
                                 id="client_address"
                                 name="client_address"
                                 value={formData.client_address}

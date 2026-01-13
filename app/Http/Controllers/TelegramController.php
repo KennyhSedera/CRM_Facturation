@@ -161,11 +161,29 @@ class TelegramController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'client_name' => 'required|string|max:255',
-            'client_email' => 'required|email|unique:users,email',
+            'client_name' => 'required|string|max:255|unique:clients,client_name',
+            'client_email' => 'required|email|unique:clients,client_email',
             'client_phone' => 'nullable|string|max:20',
             'client_cin' => 'nullable|string|max:20',
-            'client_address' => 'nullable|string|max:255',
+            'client_adress' => 'nullable|string|max:255',
+        ], [
+            'client_name.required' => 'Le nom du client est requis',
+            'client_name.string' => 'Le nom du client doit être une chaîne de caractères',
+            'client_name.max' => 'Le nom du client ne peut pas dépasser 255 caractères',
+            'client_name.unique' => 'Ce nom de client existe déjà',
+
+            'client_email.required' => 'L\'email du client est requis',
+            'client_email.email' => 'L\'email doit être une adresse email valide',
+            'client_email.unique' => 'Cet email est déjà utilisé',
+
+            'client_phone.string' => 'Le téléphone doit être une chaîne de caractères',
+            'client_phone.max' => 'Le téléphone ne peut pas dépasser 20 caractères',
+
+            'client_cin.string' => 'Le CIN doit être une chaîne de caractères',
+            'client_cin.max' => 'Le CIN ne peut pas dépasser 20 caractères',
+
+            'client_adress.string' => 'L\'adresse doit être une chaîne de caractères',
+            'client_adress.max' => 'L\'adresse ne peut pas dépasser 255 caractères',
         ]);
 
         if ($validator->fails()) {
@@ -191,7 +209,7 @@ class TelegramController extends Controller
                 "📧 <b>Email:</b> " . e($client->client_email) . "\n" .
                 "📱 <b>Téléphone:</b> " . e($client->client_phone ?? 'Non renseigné') . "\n" .
                 "🆔 <b>CIN:</b> " . e($client->client_cin ?? 'Non renseigné') . "\n" .
-                "📍 <b>Adresse:</b> " . e($client->client_address ?? 'Non renseignée') . "\n",
+                "📍 <b>Adresse:</b> " . e($client->client_adress ?? 'Non renseignée') . "\n",
                 chat_id: $id,
                 parse_mode: 'HTML'
             );
