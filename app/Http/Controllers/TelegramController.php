@@ -214,6 +214,11 @@ class TelegramController extends Controller
                 parse_mode: 'HTML'
             );
 
+            $clientCount = Client::where('company_id', $user->company_id)->count();
+
+            Company::where('company_id', $user->company_id)
+                ->update(['client_count' => $clientCount]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Client created successfully',

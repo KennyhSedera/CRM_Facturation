@@ -247,7 +247,7 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
 
     return (
         <>
-            <Head title="Créer mon client" />
+            <Head title="Créer un client" />
 
             <div
                 className="min-h-screen p-4"
@@ -258,7 +258,7 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
             >
                 <div className="mx-auto max-w-2xl">
                     <div className="mb-6 text-center">
-                        <h1 className="mb-2 text-3xl font-bold">🏢 Créer mon client</h1>
+                        <h1 className="mb-2 text-3xl font-bold">🏢 Créer un client</h1>
                         <p className="opacity-70">Remplissez les informations de votre client</p>
                     </div>
 
