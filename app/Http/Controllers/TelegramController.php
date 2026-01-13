@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use Str;
 
 class TelegramController extends Controller
@@ -104,7 +106,7 @@ class TelegramController extends Controller
                 "🌐 <b>Site web:</b> " . e($company->company_website ?? 'Non renseigné') . "\n" .
                 "📍 <b>Adresse:</b> " . e($company->company_address ?? 'Non renseignée') . "\n" .
                 "📝 <b>Description:</b> " . e($company->company_description ?? 'Aucune') . "\n\n" .
-                "Utiliser la commande /subscribe pour souscrire au plan Premiun ou Entreprise. Plan actuel: " . e($company->plan_status) . "\n\n" .
+                "Utiliser la commande /subscribe pour souscrire au plan '⭐ Premiun' ou '🏢 Entreprise'. Plan actuel: " . e($company->plan_status) . "\n\n" .
                 "👤 <b>Compte administrateur créé</b>\n" .
                 "Email: " . e($adminUser->email) . "\n" .
                 "Mot de passe temporaire: " . e($currentPassword) . "\n" .
@@ -196,6 +198,28 @@ class TelegramController extends Controller
             ], 422);
         }
 
+        $user = User::where('telegram_id', $id)->first();
+
+        $clientCount = Client::where('company_id', $user->company_id)->count();
+        $maxClients = Client::getMaxClients($user->company->plan_status);
+
+        if ($clientCount >= $maxClients) {
+            $message = "⚠️ <b>Limite atteinte</b>\n\n"
+                . "Votre plan {$user->company->plan_status} permet {$maxClients} clients maximum.\n"
+                . "Vous avez déjà {$clientCount} clients.\n\n"
+                . "💎 Passez à un plan supérieur pour ajouter plus de clients.";
+
+            $bot->sendMessage(
+                $message,
+                parse_mode: 'HTML'
+            );
+
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+            ], 422);
+        }
+
         DB::beginTransaction();
 
         try {
@@ -205,16 +229,19 @@ class TelegramController extends Controller
 
             DB::commit();
 
-            $bot->sendMessage(
-                text: "✅ <b>Client créé avec succès !</b>\n\n" .
-                "📌 <b>Nom:</b> " . e($client->client_name) . "\n" .
-                "📧 <b>Email:</b> " . e($client->client_email) . "\n" .
-                "📱 <b>Téléphone:</b> " . e($client->client_phone ?? 'Non renseigné') . "\n" .
-                "🆔 <b>CIN:</b> " . e($client->client_cin ?? 'Non renseigné') . "\n" .
-                "📍 <b>Adresse:</b> " . e($client->client_adress ?? 'Non renseignée') . "\n",
-                chat_id: $id,
-                parse_mode: 'HTML'
-            );
+            $message = "✅ <b>Client créé avec succès !</b>\n\n"
+                . $client->formatForDisplay();
+
+            $keyboard = InlineKeyboardMarkup::make()
+                ->addRow(
+                    InlineKeyboardButton::make('📋 Créer un devis', callback_data: "quote_create_{$client->client_id}"),
+                    InlineKeyboardButton::make('👥 Voir tous les clients', callback_data: 'client_list')
+                )
+                ->addRow(
+                    InlineKeyboardButton::make('🏢 Menu Principale', callback_data: 'menu_back')
+                );
+
+            $bot->sendMessage($message, chat_id: $id, parse_mode: 'HTML', reply_markup: $keyboard);
 
             $clientCount = Client::where('company_id', $user->company_id)->count();
 

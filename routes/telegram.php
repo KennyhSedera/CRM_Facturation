@@ -25,10 +25,10 @@ use App\Telegram\Commands\ArticlesCommand;
 use App\Telegram\Commands\MenuCommande;
 use App\Telegram\Conversations\CreateTicketConversation;
 use App\Telegram\Handlers\TextHandler;
+use App\Telegram\Keyboards\WebAppKeyboard;
 use SergiX44\Nutgram\Telegram\Properties\ParseMode;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
-use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppData;
 use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
 
 /*
@@ -52,16 +52,7 @@ $bot->onCommand('createcompany', function (Nutgram $bot) {
         return;
     }
 
-    $telegramUser = $bot->user();
-    $webAppUrl = route('webapp.form.company', ['user_id' => $telegramUser->id]);
-
-    $keyboard = InlineKeyboardMarkup::make()
-        ->addRow(
-            InlineKeyboardButton::make(
-                text: '📝 Créer mon entreprise',
-                web_app: new WebAppInfo($webAppUrl)
-            )
-        );
+    $keyboard = (new WebAppKeyboard())->buttonCreateCompany($bot);
 
     $bot->sendMessage(
         text: "🏢 <b>Créer votre entreprise</b>\n\n" .
@@ -76,16 +67,7 @@ $bot->onCommand('createclient', function (Nutgram $bot) {
     if (!$user)
         return;
 
-    $telegramUser = $bot->user();
-    $webAppUrl = route('webapp.form.client', ['user_id' => $telegramUser->id]);
-
-    $keyboard = InlineKeyboardMarkup::make()
-        ->addRow(
-            InlineKeyboardButton::make(
-                text: '📝 Ajouter un client',
-                web_app: new WebAppInfo($webAppUrl)
-            )
-        );
+    $keyboard = (new WebAppKeyboard())->buttonCreateClient($bot);
 
     $bot->sendMessage(
         text: "🏢 <b>Ajouter un client</b>\n\n" .

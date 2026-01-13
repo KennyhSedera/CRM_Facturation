@@ -11,6 +11,7 @@ use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use SergiX44\Nutgram\Telegram\Properties\ParseMode;
+use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
 
 class CreateCompanyCommand
 {
@@ -29,21 +30,24 @@ class CreateCompanyCommand
         $bot->sendMessage(
             text: $message,
             parse_mode: ParseMode::HTML,
-            reply_markup: $this->getPlanKeyboard()
+            reply_markup: $this->getPlanKeyboard($bot)
         );
     }
 
-    protected function getPlanKeyboard(): InlineKeyboardMarkup
+    protected function getPlanKeyboard(Nutgram $bot): InlineKeyboardMarkup
     {
-        return InlineKeyboardMarkup::make()
+        $telegramUser = $bot->user();
+        $webAppUrl = route('webapp.form.company', ['user_id' => $telegramUser->id]);
+
+        $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
-                InlineKeyboardButton::make('🆓 Gratuitement (0 FCFA)', callback_data: 'plan:free'),
-                InlineKeyboardButton::make('⭐ Premium (9.900 FCFA)', callback_data: 'plan:premium')
-            )
-            ->addRow(
-                InlineKeyboardButton::make('🏢 Entreprise (14.900 FCFA)', callback_data: 'plan:entreprise'),
-                InlineKeyboardButton::make('⏭️ Plus tard', callback_data: 'plan:cancel')
+                InlineKeyboardButton::make(
+                    text: '📝 Créer mon entreprise',
+                    web_app: new WebAppInfo($webAppUrl)
+                )
             );
+
+        return $keyboard;
     }
 
     public static function handlePlanSelection(Nutgram $bot): void

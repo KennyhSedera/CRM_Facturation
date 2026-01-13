@@ -170,7 +170,6 @@ class Client extends Model
         $statusText = $this->isActive() ? 'Actif' : 'Inactif';
         $info .= "{$statusEmoji} Statut: {$statusText}\n";
 
-        // ✅ Vérifier si les tables existent avant de compter
         try {
             if (Schema::hasTable('quotes')) {
                 $quotesCount = $this->getTotalQuotes();
@@ -186,9 +185,20 @@ class Client extends Model
 
             $info .= "📊 {$quotesCount} devis • {$invoicesCount} factures";
         } catch (\Exception $e) {
-            // Si erreur, on n'affiche pas les stats
+
         }
 
         return $info;
+    }
+
+    public function getMaxClients(string $plan): int
+    {
+        $limits = [
+            'free' => 3,
+            'premium' => 500,
+            'enterprise' => 999999,
+        ];
+
+        return $limits[$plan] ?? 3;
     }
 }

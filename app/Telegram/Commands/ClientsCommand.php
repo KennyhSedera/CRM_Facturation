@@ -9,6 +9,7 @@ use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use App\Models\User;
 use App\Models\Client;
 use App\Models\Company;
+use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
 
 /**
  * Commande principale pour gérer les clients
@@ -36,9 +37,12 @@ class ClientsCommand extends Command
             . "📊 Vous avez <b>{$clientCount} client(s)</b>\n\n"
             . "Que souhaitez-vous faire ?";
 
+        $telegramUser = $bot->user();
+        $webAppUrl = route('webapp.form.client', ['user_id' => $telegramUser->id]);
+
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
-                InlineKeyboardButton::make('➕ Ajouter un client', callback_data: 'client_add'),
+                InlineKeyboardButton::make('➕ Ajouter un client', web_app: new WebAppInfo($webAppUrl)),
                 InlineKeyboardButton::make('📋 Voir mes clients', callback_data: 'client_list')
             )
             ->addRow(
@@ -221,7 +225,7 @@ class ClientCallbackHandler
 
         // Vérifier les limites du plan
         $clientCount = Client::where('company_id', $user->company_id)->count();
-        $maxClients = self::getMaxClients($user->company->plan_status);
+        $maxClients = Client::getMaxClients($user->company->plan_status);
 
         if ($clientCount >= $maxClients) {
             $bot->sendMessage(
@@ -348,20 +352,6 @@ class ClientCallbackHandler
         );
 
         $bot->answerCallbackQuery("✅ Client supprimé");
-    }
-
-    /**
-     * Obtenir le nombre maximum de clients selon le plan
-     */
-    private static function getMaxClients(string $plan): int
-    {
-        $limits = [
-            'free' => 3,
-            'premium' => 500,
-            'enterprise' => 999999,
-        ];
-
-        return $limits[$plan] ?? 3;
     }
 
     /**
