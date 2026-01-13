@@ -202,9 +202,10 @@ class User extends Authenticatable
 
         return $user;
     }
-    public function checkCompanyExistsForUser(Nutgram $bot): bool
+
+    public static function checkCompanyExistsForUser(Nutgram $bot): bool
     {
-        $user = User::where('telegram_id', $this->telegram_id)->first();
+        $user = User::where('telegram_id', $bot->userId())->first();
 
         if (!$user) {
             return true;
