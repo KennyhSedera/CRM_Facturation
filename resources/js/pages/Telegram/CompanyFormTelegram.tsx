@@ -166,14 +166,12 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
     const validateFormData = (data: FormData): FormErrors => {
         const newErrors: FormErrors = {};
 
-        // Validation du nom
         if (!data.company_name.trim()) {
             newErrors.company_name = "Le nom de l'entreprise est requis";
         } else if (data.company_name.trim().length < 2) {
             newErrors.company_name = 'Le nom doit contenir au moins 2 caractères';
         }
 
-        // Validation de l'email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!data.company_email.trim()) {
             newErrors.company_email = "L'email est requis";
@@ -181,14 +179,12 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
             newErrors.company_email = "L'email doit être valide";
         }
 
-        // Validation de la description
         if (!data.company_description.trim()) {
             newErrors.company_description = 'La description est requise';
         } else if (data.company_description.trim().length < 10) {
             newErrors.company_description = 'La description doit contenir au moins 10 caractères';
         }
 
-        // Validation du téléphone
         if (!data.company_phone.trim()) {
             newErrors.company_phone = 'Le téléphone est requis';
         } else if (data.company_phone.trim().length < 8) {
@@ -233,7 +229,13 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                 })
                     .then((response) => response.json())
                     .then((data) => {
-                        alert('✅ Entreprise créée!\n\nDonnées: ' + dataToSend);
+                        if (data.success) {
+                            telegramApp.showAlert('✅ Entreprise créée!: ');
+                            alert('✅ Entreprise créée!: ');
+                        } else {
+                            telegramApp.showAlert('❌ Une erreur est survenue: ' + (data.message || 'Erreur inconnue'));
+                            alert('❌ Une erreur est survenue: ' + (data.message || 'Erreur inconnue'));
+                        }
                         setIsLoading(false);
                     })
                     .catch((error) => {
@@ -261,10 +263,6 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
         }
     };
 
-    const handleSubmit = () => {
-        handleSubmitAction(tg);
-    };
-
     return (
         <>
             <Head title="Créer mon entreprise" />
@@ -277,15 +275,12 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                 }}
             >
                 <div className="mx-auto max-w-2xl">
-                    {/* En-tête */}
                     <div className="mb-6 text-center">
                         <h1 className="mb-2 text-3xl font-bold">🏢 Créer mon entreprise</h1>
                         <p className="opacity-70">Remplissez les informations de votre entreprise</p>
                     </div>
 
-                    {/* Formulaire */}
                     <div className="space-y-5">
-                        {/* Nom de l'entreprise */}
                         <div>
                             <label htmlFor="company_name" className="mb-2 block text-sm font-semibold">
                                 Nom de l'entreprise <span className="text-red-500">*</span>
@@ -313,7 +308,6 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                             )}
                         </div>
 
-                        {/* Email */}
                         <div>
                             <label htmlFor="company_email" className="mb-2 block text-sm font-semibold">
                                 Email professionnel <span className="text-red-500">*</span>
@@ -341,37 +335,6 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                             )}
                         </div>
 
-                        {/* Description */}
-                        <div>
-                            <label htmlFor="company_description" className="mb-2 block text-sm font-semibold">
-                                Description de l'activité <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
-                                id="company_description"
-                                name="company_description"
-                                value={formData.company_description}
-                                onChange={handleChange}
-                                placeholder="Décrivez votre activité principale..."
-                                rows={4}
-                                maxLength={500}
-                                className={`w-full resize-y rounded-xl border-2 px-4 py-3 transition-all ${
-                                    errors.company_description ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
-                                }`}
-                                style={{
-                                    backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
-                                    color: tg?.themeParams?.text_color || '#000000',
-                                }}
-                                disabled={isLoading}
-                            />
-                            {errors.company_description && (
-                                <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
-                                    <span>⚠️</span> {errors.company_description}
-                                </p>
-                            )}
-                            <p className="mt-1 text-xs opacity-60">{formData.company_description.length} / 500 caractères</p>
-                        </div>
-
-                        {/* Téléphone */}
                         <div>
                             <label htmlFor="company_phone" className="mb-2 block text-sm font-semibold">
                                 Téléphone <span className="text-red-500">*</span>
@@ -399,25 +362,33 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                             )}
                         </div>
 
-                        {/* Site web (optionnel) */}
                         <div>
-                            <label htmlFor="company_website" className="mb-2 block text-sm font-semibold">
-                                Site web <span className="text-gray-400">(optionnel)</span>
+                            <label htmlFor="company_description" className="mb-2 block text-sm font-semibold">
+                                Description de l'activité <span className="text-red-500">*</span>
                             </label>
-                            <input
-                                type="url"
-                                id="company_website"
-                                name="company_website"
-                                value={formData.company_website}
+                            <textarea
+                                id="company_description"
+                                name="company_description"
+                                value={formData.company_description}
                                 onChange={handleChange}
-                                placeholder="Ex: www.techsolutions.mg"
-                                className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 transition-all focus:border-blue-500"
+                                placeholder="Décrivez votre activité principale..."
+                                rows={4}
+                                maxLength={500}
+                                className={`w-full resize-y rounded-xl border-2 px-4 py-3 transition-all ${
+                                    errors.company_description ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
+                                }`}
                                 style={{
                                     backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
                                     color: tg?.themeParams?.text_color || '#000000',
                                 }}
                                 disabled={isLoading}
                             />
+                            {errors.company_description && (
+                                <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
+                                    <span>⚠️</span> {errors.company_description}
+                                </p>
+                            )}
+                            <p className="mt-1 text-xs opacity-60">{formData.company_description.length} / 500 caractères</p>
                         </div>
                     </div>
 

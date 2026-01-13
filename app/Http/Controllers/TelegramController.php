@@ -52,12 +52,12 @@ class TelegramController extends Controller
         if ($validator->fails()) {
             Log::error("Validation failed", ['errors' => $validator->errors()]);
 
-            $bot->sendMessage(
-                text: "❌ <b>Erreur de validation</b>\n\n" .
-                implode("\n", $validator->errors()->all()),
-                chat_id: $id,
-                parse_mode: 'HTML'
-            );
+            // $bot->sendMessage(
+            //     text: "❌ <b>Erreur de validation</b>\n\n" .
+            //     implode("\n", $validator->errors()->all()),
+            //     chat_id: $id,
+            //     parse_mode: 'HTML'
+            // );
 
             return response()->json([
                 'success' => false,
