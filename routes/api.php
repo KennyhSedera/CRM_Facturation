@@ -20,6 +20,8 @@ Route::prefix('companies')->group(function () {
     Route::get('/{id}/users', [CompanyController::class, 'getUsers']);
 });
 
+Route::post('/telegram/company/create/{id}', [TelegramController::class, 'createCompany']);
+
 Route::middleware('auth:sanctum')->group(function () {
     // routes clients
     Route::apiResource('clients', ClientController::class);

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\TelegramBotController;
 use App\Http\Controllers\WebAppController;
+use App\Models\User;
 use App\Telegram\Callbacks\AlertCallback;
 use App\Telegram\Handlers\PaymentProofHandler;
 use App\Telegram\Handlers\CreateCompanyPaymentHandler;
@@ -46,46 +47,10 @@ $bot->registerCommand(PendingPaymentsCommand::class);
 $bot->registerCommand(ArticlesCommand::class);
 $bot->registerCommand(MenuCommande::class);
 
-// Commande pour créer une entreprise
 // $bot->onCommand('createcompany', CreateCompanyCommand::class);
 $bot->onCommand('quotes', [AlertCallback::class, 'handle']);
 $bot->onCommand('calculate', [AlertCallback::class, 'handle']);
 $bot->onCommand('settings', [AlertCallback::class, 'handle']);
-
-
-$bot->onCommand('formulaire', function (Nutgram $bot) {
-    $keyboard = InlineKeyboardMarkup::make()->addRow(
-        InlineKeyboardButton::make(
-            text: '📝 Remplir le formulaire',
-            web_app: new WebAppInfo(
-                url: 'https://priceless-swanson.217-154-114-211.plesk.page/company/form/telegram'
-            )
-        )
-    );
-
-    $bot->sendMessage(
-        text: "Clique ci-dessous pour remplir le formulaire 👇",
-        reply_markup: $keyboard
-    );
-});
-
-$bot->onWebAppData(function (Nutgram $bot, WebAppData $webAppData) {
-    Log::info("WebAppData reçu", ['raw' => $webAppData]);
-
-    $payload = json_decode($webAppData->data, true);
-    $email = $payload['email'] ?? null;
-    $phone = $payload['phone'] ?? null;
-
-    Log::info('Web app form data decoded', [
-        'email' => $email,
-        'phone' => $phone,
-    ]);
-
-    $bot->sendMessage(
-        text: "✅ Formulaire reçu !\n📧 Email: $email\n📞 Téléphone: $phone"
-    );
-});
-
 
 // Commande pour annuler le processus
 $bot->onCommand('cancel', function (Nutgram $bot) {
@@ -207,7 +172,7 @@ $bot->onCommand('cancel', function (Nutgram $bot) {
         $bot->sendMessage(
             text: "❌ <b>Recherche d'article annulée</b>\n\n" .
             "Utilisez /articles pour gérer vos articles.",
-            parse_mode: \SergiX44\Nutgram\Telegram\Properties\ParseMode::HTML
+            parse_mode: ParseMode::HTML
         );
     } else {
         $bot->sendMessage("ℹ️ Aucun processus en cours à annuler.");
@@ -583,12 +548,16 @@ $bot->onCallbackQueryData('menu_settings', function (Nutgram $bot) {
     (new AlertCallback())->handle($bot);
 });
 
-// ✅ MODIFIER la commande /createcompany pour utiliser le WebApp
+/*
+|--------------------------------------------------------------------------
+| Gestion des company
+|--------------------------------------------------------------------------
+*/
+
 $bot->onCommand('createcompany', function (Nutgram $bot) {
     $telegramUser = $bot->user();
 
-    // Vérifier si l'utilisateur a déjà une entreprise
-    $user = \App\Models\User::where('telegram_id', $telegramUser->id)->first();
+    $user = User::where('telegram_id', $telegramUser->id)->first();
 
     if ($user && $user->company_id) {
         $bot->sendMessage(
@@ -599,7 +568,6 @@ $bot->onCommand('createcompany', function (Nutgram $bot) {
         return;
     }
 
-    // ✅ URL du WebApp
     $webAppUrl = route('webapp.form', ['user_id' => $telegramUser->id]);
 
     $keyboard = InlineKeyboardMarkup::make()

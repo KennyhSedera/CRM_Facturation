@@ -14,6 +14,10 @@ class MenuCommande extends Command
 
     public function handle(Nutgram $bot): void
     {
+        $user = User::checkTelegramAccess($bot, requireCompany: true);
+        if (!$user)
+            return;
+
         MenuCallback::showMenu($bot);
     }
 }

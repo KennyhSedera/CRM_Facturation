@@ -194,14 +194,8 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
     };
 
     const handleSubmitAction = () => {
-        // Utiliser formDataRef.current pour avoir les données à jour
         const currentData = formDataRef.current;
 
-        console.log('=== SUBMIT ===');
-        console.log('TG disponible?', !!tg);
-        console.log('Données actuelles:', currentData);
-
-        // Valider les données
         const validationErrors = validateFormData(currentData);
 
         if (Object.keys(validationErrors).length > 0) {
@@ -216,28 +210,27 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
             return;
         }
 
-        console.log('Validation OK, envoi des données...');
         setIsLoading(true);
         tg?.MainButton.showProgress();
 
         try {
             const dataToSend = JSON.stringify(currentData);
-            console.log('Données à envoyer:', dataToSend);
+            alert('Données à envoyer: ' + dataToSend);
+            tg?.close();
+            // if (tg) {
+            //     console.log('Envoi via Telegram WebApp...');
+            //     tg.sendData(dataToSend);
+            //     console.log('Données envoyées, fermeture dans 1s...');
 
-            if (tg) {
-                console.log('Envoi via Telegram WebApp...');
-                tg.sendData(dataToSend);
-                console.log('Données envoyées, fermeture dans 1s...');
-
-                setTimeout(() => {
-                    console.log('Fermeture de la WebApp');
-                    tg.close();
-                }, 1000);
-            } else {
-                console.error('Telegram WebApp non disponible!');
-                alert('❌ Telegram WebApp non disponible. Données: ' + dataToSend);
-                setIsLoading(false);
-            }
+            //     setTimeout(() => {
+            //         console.log('Fermeture de la WebApp');
+            //         tg.close();
+            //     }, 1000);
+            // } else {
+            //     console.error('Telegram WebApp non disponible!');
+            //     alert('❌ Telegram WebApp non disponible. Données: ' + dataToSend);
+            //     setIsLoading(false);
+            // }
         } catch (error) {
             console.error("Erreur lors de l'envoi:", error);
             if (tg) {
@@ -447,36 +440,6 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                             </span>
                         </p>
                     </div>
-
-                    {/* BOUTON DE SECOURS */}
-                    {showFallbackButton && (
-                        <div className="fixed right-0 bottom-0 left-0 border-t-2 border-gray-200 bg-white p-4 shadow-lg">
-                            <button
-                                onClick={handleSubmit}
-                                disabled={isLoading}
-                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-500 px-6 py-4 font-bold text-white transition-colors hover:bg-blue-600 active:bg-blue-700 disabled:bg-gray-400"
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                            <path
-                                                className="opacity-75"
-                                                fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                            />
-                                        </svg>
-                                        <span>Création en cours...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <span>✅</span>
-                                        <span>Créer l'entreprise</span>
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    )}
                 </div>
             </div>
         </>
