@@ -179,12 +179,6 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
             newErrors.company_email = "L'email doit être valide";
         }
 
-        if (!data.company_description.trim()) {
-            newErrors.company_description = 'La description est requise';
-        } else if (data.company_description.trim().length < 10) {
-            newErrors.company_description = 'La description doit contenir au moins 10 caractères';
-        }
-
         if (!data.company_phone.trim()) {
             newErrors.company_phone = 'Le téléphone est requis';
         } else if (data.company_phone.trim().length < 8) {
@@ -229,12 +223,12 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                 })
                     .then((response) => response.json())
                     .then((data) => {
+                        alert('Response data: ' + JSON.stringify(data));
                         if (data.success) {
-                            telegramApp.showAlert('✅ Entreprise créée!: ');
-                            alert('✅ Entreprise créée!: ');
+                            telegramApp.showAlert('✅ Entreprise créée avec succès!');
+                            telegramApp.close();
                         } else {
-                            telegramApp.showAlert('❌ Une erreur est survenue: ' + (data.message || 'Erreur inconnue'));
-                            alert('❌ Une erreur est survenue: ' + (data.message || 'Erreur inconnue'));
+                            telegramApp.showAlert('❌ Une erreur est survenue: ' + (data.errors || 'Erreur inconnue'));
                         }
                         setIsLoading(false);
                     })
@@ -242,11 +236,8 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                         telegramApp.showAlert('❌ Une erreur est survenue: ' + error);
                         telegramApp.MainButton.hideProgress();
                         setIsLoading(false);
+                        telegramApp.close();
                     });
-
-                setTimeout(() => {
-                    telegramApp.close();
-                }, 2000);
             } else {
                 alert('✅ Entreprise créée! (Mode test)\n\nDonnées: ' + dataToSend);
                 setIsLoading(false);
@@ -364,7 +355,7 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
 
                         <div>
                             <label htmlFor="company_description" className="mb-2 block text-sm font-semibold">
-                                Description de l'activité <span className="text-red-500">*</span>
+                                Description de l'activité
                             </label>
                             <textarea
                                 id="company_description"
