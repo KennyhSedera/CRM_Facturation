@@ -60,19 +60,16 @@ class TelegramController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Company and admin user created successfully',
-                'data' => [
-                    'company' => $company,
-                    'admin_user' => [
-                        'id' => $adminUser->id,
-                        'name' => $adminUser->name,
-                        'email' => $adminUser->email,
-                        'user_role' => $adminUser->user_role,
-                    ]
-                ]
-            ], 201);
+            return $bot->sendMessage(
+                text: "✅ <b>Company created successfully</b>\n\n" .
+                "Name: " . $company->company_name . "\n" .  // Display the company name
+                "Email: " . $company->company_email . "\n" .  // Display the company email
+                "Description: " . $company->company_description . "\n" .  // Display the company description
+                "Phone: " . $company->company_phone . "\n" .  // Display the company phone
+                "Website: " . $company->company_website . "\n" .  // Display the company website
+                "User Role: " . $adminUser->user_role . "\n",  // Display the user role
+                parse_mode: 'HTML'
+            );
         } catch (\Exception $e) {
             DB::rollBack();
 

@@ -222,16 +222,34 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
             console.log('Données à envoyer:', dataToSend);
 
             if (telegramApp) {
-                // Envoyer les données via Telegram
-                telegramApp.sendData(dataToSend);
+                const userId = telegramApp.initDataUnsafe?.user?.id || telegram_id;
+                const endpoint = `/api/telegram/company/create/${userId}`;
 
-                // Fermer la WebApp après un court délai
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: dataToSend,
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log('Données envoyées:', data);
+                        alert('✅ Entreprise créée!\n\nDonnées: ' + dataToSend);
+                        setIsLoading(false);
+                    })
+                    .catch((error) => {
+                        console.error("Erreur lors de l'envoi:", error);
+                        telegramApp.showAlert('❌ Une erreur est survenue: ' + error);
+                        telegramApp.MainButton.hideProgress();
+                        setIsLoading(false);
+                    });
+
                 setTimeout(() => {
                     console.log('Fermeture de la WebApp');
                     telegramApp.close();
-                }, 500);
+                }, 2000);
             } else {
-                // Mode développement/fallback
                 console.log('Mode fallback - Données:', dataToSend);
                 alert('✅ Entreprise créée! (Mode test)\n\nDonnées: ' + dataToSend);
                 setIsLoading(false);
