@@ -193,7 +193,7 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
                         console.log('Response data:', data);
 
                         if (data.success) {
-                            telegramApp.showAlert('✅ Entreprise créée avec succès!');
+                            telegramApp.showAlert('✅ client créée avec succès!');
                             setTimeout(() => {
                                 telegramApp.close();
                             }, 1000);
@@ -230,7 +230,7 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
                         telegramApp.close();
                     });
             } else {
-                alert('✅ Entreprise créée! (Mode test)\n\nDonnées: ' + dataToSend);
+                alert('✅ client créée! (Mode test)\n\nDonnées: ' + dataToSend);
                 setIsLoading(false);
             }
         } catch (error) {
@@ -247,7 +247,7 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
 
     return (
         <>
-            <Head title="Créer mon entreprise" />
+            <Head title="Créer mon client" />
 
             <div
                 className="min-h-screen p-4"
@@ -258,8 +258,8 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
             >
                 <div className="mx-auto max-w-2xl">
                     <div className="mb-6 text-center">
-                        <h1 className="mb-2 text-3xl font-bold">🏢 Créer mon entreprise</h1>
-                        <p className="opacity-70">Remplissez les informations de votre entreprise</p>
+                        <h1 className="mb-2 text-3xl font-bold">🏢 Créer mon client</h1>
+                        <p className="opacity-70">Remplissez les informations de votre client</p>
                     </div>
 
                     <div className="space-y-5">
@@ -396,8 +396,8 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
                             <span className="text-lg">ℹ️</span>
                             <span>
                                 {showFallbackButton
-                                    ? 'Cliquez sur le bouton ci-dessus pour créer votre entreprise'
-                                    : "Cliquez sur le bouton en bas de l'écran pour créer votre entreprise"}
+                                    ? 'Cliquez sur le bouton ci-dessus pour créer votre client'
+                                    : "Cliquez sur le bouton en bas de l'écran pour créer votre client"}
                             </span>
                         </p>
                     </div>
