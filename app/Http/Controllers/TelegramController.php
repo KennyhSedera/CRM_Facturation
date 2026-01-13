@@ -47,6 +47,54 @@ class TelegramController extends Controller
             'plan_end_date' => 'nullable|date|after_or_equal:plan_start_date',
             'company_currency' => 'nullable|string|max:10',
             'company_timezone' => 'nullable|string|max:50',
+        ], [
+            // Messages pour company_name
+            'company_name.required' => 'Le nom de l\'entreprise est requis',
+            'company_name.string' => 'Le nom de l\'entreprise doit être une chaîne de caractères',
+            'company_name.max' => 'Le nom de l\'entreprise ne peut pas dépasser 255 caractères',
+            'company_name.unique' => 'Ce nom d\'entreprise existe déjà',
+
+            // Messages pour company_email
+            'company_email.required' => 'L\'email de l\'entreprise est requis',
+            'company_email.email' => 'L\'email doit être une adresse email valide',
+            'company_email.unique' => 'Cet email est déjà utilisé',
+
+            // Messages pour company_phone
+            'company_phone.string' => 'Le téléphone doit être une chaîne de caractères',
+            'company_phone.max' => 'Le téléphone ne peut pas dépasser 20 caractères',
+
+            // Messages pour company_website
+            'company_website.url' => 'Le site web doit être une URL valide',
+            'company_website.max' => 'Le site web ne peut pas dépasser 255 caractères',
+
+            // Messages pour company_address
+            'company_address.string' => 'L\'adresse doit être une chaîne de caractères',
+            'company_address.max' => 'L\'adresse ne peut pas dépasser 500 caractères',
+
+            // Messages pour company_description
+            'company_description.string' => 'La description doit être une chaîne de caractères',
+
+            // Messages pour is_active
+            'is_active.boolean' => 'Le statut actif doit être vrai ou faux',
+
+            // Messages pour plan_status
+            'plan_status.string' => 'Le statut du plan doit être une chaîne de caractères',
+            'plan_status.max' => 'Le statut du plan ne peut pas dépasser 50 caractères',
+
+            // Messages pour plan_start_date
+            'plan_start_date.date' => 'La date de début doit être une date valide',
+
+            // Messages pour plan_end_date
+            'plan_end_date.date' => 'La date de fin doit être une date valide',
+            'plan_end_date.after_or_equal' => 'La date de fin doit être égale ou postérieure à la date de début',
+
+            // Messages pour company_currency
+            'company_currency.string' => 'La devise doit être une chaîne de caractères',
+            'company_currency.max' => 'La devise ne peut pas dépasser 10 caractères',
+
+            // Messages pour company_timezone
+            'company_timezone.string' => 'Le fuseau horaire doit être une chaîne de caractères',
+            'company_timezone.max' => 'Le fuseau horaire ne peut pas dépasser 50 caractères',
         ]);
 
         if ($validator->fails()) {
