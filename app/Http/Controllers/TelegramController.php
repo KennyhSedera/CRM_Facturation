@@ -104,10 +104,12 @@ class TelegramController extends Controller
                 "🌐 <b>Site web:</b> " . e($company->company_website ?? 'Non renseigné') . "\n" .
                 "📍 <b>Adresse:</b> " . e($company->company_address ?? 'Non renseignée') . "\n" .
                 "📝 <b>Description:</b> " . e($company->company_description ?? 'Aucune') . "\n\n" .
+                "Utiliser la commande /subscribe pour souscrire au plan Premiun ou Entreprise. Plan actuel: " . e($company->plan_status) . "\n\n" .
                 "👤 <b>Compte administrateur créé</b>\n" .
                 "Email: " . e($adminUser->email) . "\n" .
                 "Mot de passe temporaire: " . e($currentPassword) . "\n" .
-                "Rôle: " . e($adminUser->user_role),
+                "Rôle: " . e($adminUser->user_role) . '\n\n' .
+                "👉 <b>Connectez-vous et rendez-vous sur votre compte pour modifier vos informations personnelles et votre mot de passe.</b> \n Lien web : " . url(env('APP_URL')),
                 chat_id: $id,
                 parse_mode: 'HTML'
             );
