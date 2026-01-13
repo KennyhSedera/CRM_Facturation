@@ -78,10 +78,12 @@ class TelegramController extends Controller
 
             $company = Company::create($validated);
 
+            $currentPassword = Str::random(16);
+
             $adminUser = User::create([
                 'name' => 'Admin ' . $company->company_name,
                 'email' => $company->company_email,
-                'password' => Hash::make(Str::random(16)), // Mot de passe sécurisé aléatoire
+                'password' => Hash::make($currentPassword),
                 'company_id' => $company->company_id,
                 'user_role' => 'admin_company',
             ]);
@@ -104,7 +106,7 @@ class TelegramController extends Controller
                 "📝 <b>Description:</b> " . e($company->company_description ?? 'Aucune') . "\n\n" .
                 "👤 <b>Compte administrateur créé</b>\n" .
                 "Email: " . e($adminUser->email) . "\n" .
-                "Mot de passe temporaire: " . e($adminUser->password) . "\n" .
+                "Mot de passe temporaire: " . e($currentPassword) . "\n" .
                 "Rôle: " . e($adminUser->user_role),
                 chat_id: $id,
                 parse_mode: 'HTML'

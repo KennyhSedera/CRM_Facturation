@@ -82,7 +82,7 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
         company_description: '',
         company_phone: '',
         company_website: '',
-        company_address: '',
+        company_address: 'Togo',
         plan_status: 'free',
         plan_start_date: new Date().toISOString().split('T')[0],
         plan_end_date: addOneMonth(new Date().toISOString().split('T')[0]),
@@ -426,52 +426,8 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                                 disabled={isLoading}
                             />
                         </div>
-
-                        {/* Adresse */}
-                        <div>
-                            <label htmlFor="company_address" className="mb-2 block text-sm font-semibold">
-                                Adresse complète <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
-                                id="company_address"
-                                name="company_address"
-                                value={formData.company_address}
-                                onChange={handleChange}
-                                placeholder="Ex: Lot II A 45, Antananarivo 101"
-                                rows={3}
-                                className={`w-full resize-y rounded-xl border-2 px-4 py-3 transition-all ${
-                                    errors.company_address ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
-                                }`}
-                                style={{
-                                    backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
-                                    color: tg?.themeParams?.text_color || '#000000',
-                                }}
-                                disabled={isLoading}
-                            />
-                            {errors.company_address && (
-                                <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
-                                    <span>⚠️</span> {errors.company_address}
-                                </p>
-                            )}
-                        </div>
                     </div>
 
-                    {/* Bouton fallback (si MainButton ne s'affiche pas) */}
-                    {showFallbackButton && (
-                        <button
-                            onClick={handleSubmit}
-                            disabled={isLoading}
-                            className="mt-6 w-full rounded-xl bg-blue-500 px-6 py-4 font-semibold text-white transition-all hover:bg-blue-600 disabled:opacity-50"
-                            style={{
-                                backgroundColor: tg?.themeParams?.button_color || '#3390ec',
-                                color: tg?.themeParams?.button_text_color || '#ffffff',
-                            }}
-                        >
-                            {isLoading ? '⏳ Envoi en cours...' : "✅ Créer l'entreprise"}
-                        </button>
-                    )}
-
-                    {/* Info en bas */}
                     <div className="mt-8 rounded-xl border-2 border-blue-200 bg-blue-50 p-4">
                         <p className="flex items-start gap-2 text-sm text-blue-800">
                             <span className="text-lg">ℹ️</span>
@@ -482,13 +438,6 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                             </span>
                         </p>
                     </div>
-
-                    {/* Debug info (à retirer en production) */}
-                    {!tg && (
-                        <div className="mt-4 rounded-xl border-2 border-yellow-200 bg-yellow-50 p-4">
-                            <p className="text-sm text-yellow-800">⚠️ Mode développement: Telegram WebApp non détecté</p>
-                        </div>
-                    )}
                 </div>
             </div>
         </>
