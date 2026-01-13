@@ -9,6 +9,7 @@ import FileInput from '@/components/ui/file-input';
 import SelectInput from '@/components/ui/SelectInput';
 import TextArea from '@/components/ui/text-area';
 import TextInput from '@/components/ui/text-input';
+import { addOneMonth } from '@/lib/utils';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { Building2, Info, MapPin, Shield } from 'lucide-react';
@@ -41,12 +42,6 @@ export default function Create() {
     const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
     const plan: PlanStatus = new URLSearchParams(url.split('?')[1]).get('plan') as PlanStatus;
-
-    const addOneMonth = (dateString: string): string => {
-        const date = new Date(dateString);
-        date.setMonth(date.getMonth() + 1);
-        return date.toISOString().split('T')[0];
-    };
 
     const { data, setData, post, processing, errors, setError } = useForm({
         company_name: '',

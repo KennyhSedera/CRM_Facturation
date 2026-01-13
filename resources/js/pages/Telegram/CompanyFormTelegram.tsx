@@ -1,4 +1,5 @@
 // resources/js/Pages/Telegram/CompanyFormTelegram.tsx
+import { addOneMonth } from '@/lib/utils';
 import { Head } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -55,6 +56,8 @@ interface FormData {
     company_website: string;
     company_address: string;
     plan_status: string;
+    plan_start_date: string;
+    plan_end_date: string;
 }
 
 interface FormErrors {
@@ -64,6 +67,8 @@ interface FormErrors {
     company_phone?: string;
     company_address?: string;
     plan_status?: string;
+    plan_start_date?: string;
+    plan_end_date?: string;
 }
 
 interface CompanyFormTelegramProps {
@@ -79,6 +84,8 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
         company_website: '',
         company_address: '',
         plan_status: 'free',
+        plan_start_date: new Date().toISOString().split('T')[0],
+        plan_end_date: addOneMonth(new Date().toISOString().split('T')[0]),
     });
 
     const [errors, setErrors] = useState<FormErrors>({});

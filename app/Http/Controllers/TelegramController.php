@@ -43,6 +43,8 @@ class TelegramController extends Controller
             'company_description' => 'nullable|string',
             'is_active' => 'boolean',
             'plan_status' => 'nullable|string|max:50',
+            'plan_start_date' => 'nullable|date',
+            'plan_end_date' => 'nullable|date|after_or_equal:plan_start_date',
         ]);
 
         if ($validator->fails()) {
