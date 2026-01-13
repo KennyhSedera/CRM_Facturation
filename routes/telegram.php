@@ -557,7 +557,7 @@ $bot->onCallbackQueryData('menu_settings', function (Nutgram $bot) {
 $bot->onCommand('createcompany', function (Nutgram $bot) {
     $telegramUser = $bot->user();
 
-    $user = User::checkTelegramAccess($bot, requireCompany: true);
+    $user = User::checkCompanyExistsForUser($bot);
     if (!$user)
         return;
 

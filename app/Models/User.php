@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Properties\ParseMode;
 
 class User extends Authenticatable
 {
@@ -138,7 +139,7 @@ class User extends Authenticatable
         if ($errorMessage) {
             $bot->sendMessage(
                 $errorMessage,
-                parse_mode: \SergiX44\Nutgram\Telegram\Properties\ParseMode::HTML
+                parse_mode: ParseMode::HTML
             );
             return false;
         }
@@ -201,20 +202,28 @@ class User extends Authenticatable
 
         return $user;
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | JWT Methods
-    |--------------------------------------------------------------------------
-    */
-
-    public function getJWTIdentifier()
+    public function checkCompanyExistsForUser(Nutgram $bot): bool
     {
-        return $this->getKey();
-    }
+        $user = User::where('telegram_id', $this->telegram_id)->first();
 
-    public function getJWTCustomClaims()
-    {
-        return [];
+        if (!$user) {
+            return true;
+        }
+
+        if ($user->company_id) {
+            $company = Company::find($user->company_id);
+
+            $bot->sendMessage(
+                "ℹ️ <b>Entreprise existante</b>\n\n"
+                . "Vous êtes déjà membre de l'entreprise:\n"
+                . "📌 <b>Nom:</b> " . e($company->company_name) . "\n"
+                . "📧 <b>Email:</b> " . e($company->company_email) . "\n"
+                . "Vous ne pouvez pas créer une nouvelle entreprise.",
+                parse_mode: ParseMode::HTML
+            );
+            return false;
+        }
+
+        return true;
     }
 }
