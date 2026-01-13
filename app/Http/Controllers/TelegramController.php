@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use SergiX44\Nutgram\Nutgram;
+use Str;
 
 class TelegramController extends Controller
 {
@@ -38,10 +39,28 @@ class TelegramController extends Controller
             'company_email' => 'required|email|unique:companies,company_email',
             'company_phone' => 'nullable|string|max:20',
             'company_website' => 'nullable|url|max:255',
+            'company_address' => 'nullable|string|max:500',
             'company_description' => 'nullable|string',
             'is_active' => 'boolean',
         ]);
 
+        if ($validator->fails()) {
+            Log::error("Validation failed", ['errors' => $validator->errors()]);
+
+            // Envoyer un message d'erreur à l'utilisateur Telegram
+            $bot->sendMessage(
+                text: "❌ <b>Erreur de validation</b>\n\n" .
+                implode("\n", $validator->errors()->all()),
+                chat_id: $id,
+                parse_mode: 'HTML'
+            );
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
         DB::beginTransaction();
 
@@ -53,25 +72,66 @@ class TelegramController extends Controller
             $adminUser = User::create([
                 'name' => 'Admin ' . $company->company_name,
                 'email' => $company->company_email,
-                'password' => Hash::make($company->company_name),
+                'password' => Hash::make(Str::random(16)), // Mot de passe sécurisé aléatoire
                 'company_id' => $company->company_id,
                 'user_role' => 'admin_company',
             ]);
 
             DB::commit();
 
-            return $bot->sendMessage(
-                text: "✅ <b>Company created successfully</b>\n\n" .
-                "Name: " . $company->company_name . "\n" .  // Display the company name
-                "Email: " . $company->company_email . "\n" .  // Display the company email
-                "Description: " . $company->company_description . "\n" .  // Display the company description
-                "Phone: " . $company->company_phone . "\n" .  // Display the company phone
-                "Website: " . $company->company_website . "\n" .  // Display the company website
-                "User Role: " . $adminUser->user_role . "\n",  // Display the user role
+            Log::info("Company created successfully", [
+                'company_id' => $company->company_id,
+                'telegram_user_id' => $id
+            ]);
+
+            // ✅ CORRECTION: Envoyer le message au bon utilisateur avec chat_id
+            $bot->sendMessage(
+                text: "✅ <b>Entreprise créée avec succès !</b>\n\n" .
+                "📌 <b>Nom:</b> " . e($company->company_name) . "\n" .
+                "📧 <b>Email:</b> " . e($company->company_email) . "\n" .
+                "📱 <b>Téléphone:</b> " . e($company->company_phone ?? 'Non renseigné') . "\n" .
+                "🌐 <b>Site web:</b> " . e($company->company_website ?? 'Non renseigné') . "\n" .
+                "📍 <b>Adresse:</b> " . e($company->company_address ?? 'Non renseignée') . "\n" .
+                "📝 <b>Description:</b> " . e($company->company_description ?? 'Aucune') . "\n\n" .
+                "👤 <b>Compte administrateur créé</b>\n" .
+                "Email: " . e($adminUser->email) . "\n" .
+                "Mot de passe temporaire: " . e($adminUser->password) . "\n" .
+                "Rôle: " . e($adminUser->user_role),
+                chat_id: $id,
                 parse_mode: 'HTML'
             );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Company created successfully',
+                'data' => [
+                    'company_id' => $company->company_id,
+                    'company_name' => $company->company_name,
+                    'admin_user_id' => $adminUser->id,
+                ]
+            ], 201);
+
         } catch (\Exception $e) {
             DB::rollBack();
+
+            Log::error("Error creating company", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'telegram_user_id' => $id
+            ]);
+
+            try {
+                $bot->sendMessage(
+                    text: "❌ <b>Erreur lors de la création de l'entreprise</b>\n\n" .
+                    "Une erreur s'est produite. Veuillez réessayer plus tard ou contactez le support.",
+                    chat_id: $id,
+                    parse_mode: 'HTML'
+                );
+            } catch (\Exception $botError) {
+                Log::error("Failed to send error message to user", [
+                    'error' => $botError->getMessage()
+                ]);
+            }
 
             return response()->json([
                 'success' => false,
@@ -80,5 +140,4 @@ class TelegramController extends Controller
             ], 500);
         }
     }
-
 }
