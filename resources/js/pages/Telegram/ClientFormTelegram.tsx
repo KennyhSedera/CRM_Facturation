@@ -1,94 +1,80 @@
-// resources/js/Pages/Telegram/CompanyFormTelegram.tsx
-import { addOneMonth } from '@/lib/utils';
 import { Head } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-// Définir le type pour Telegram WebApp
-declare global {
-    interface Window {
-        Telegram?: {
-            WebApp?: {
-                ready: () => void;
-                expand: () => void;
-                close: () => void;
-                sendData: (data: string) => void;
-                enableClosingConfirmation: () => void;
-                MainButton: {
-                    setText: (text: string) => void;
-                    show: () => void;
-                    hide: () => void;
-                    showProgress: () => void;
-                    hideProgress: () => void;
-                    onClick: (callback: () => void) => void;
-                    offClick: (callback: () => void) => void;
-                    color: string;
-                    textColor: string;
-                };
-                themeParams?: {
-                    bg_color?: string;
-                    text_color?: string;
-                    hint_color?: string;
-                    link_color?: string;
-                    button_color?: string;
-                    button_text_color?: string;
-                    secondary_bg_color?: string;
-                };
-                initData?: string;
-                initDataUnsafe?: {
-                    user?: {
-                        id: number;
-                        first_name: string;
-                        last_name?: string;
-                        username?: string;
-                    };
-                };
-                showAlert: (message: string) => void;
-            };
-        };
-    }
-}
+// // declare global {
+//     interface Window {
+//         Telegram?: {
+//             WebApp?: {
+//                 ready: () => void;
+//                 expand: () => void;
+//                 close: () => void;
+//                 sendData: (data: string) => void;
+//                 enableClosingConfirmation: () => void;
+//                 MainButton: {
+//                     setText: (text: string) => void;
+//                     show: () => void;
+//                     hide: () => void;
+//                     showProgress: () => void;
+//                     hideProgress: () => void;
+//                     onClick: (callback: () => void) => void;
+//                     offClick: (callback: () => void) => void;
+//                     color: string;
+//                     textColor: string;
+//                 };
+//                 themeParams?: {
+//                     bg_color?: string;
+//                     text_color?: string;
+//                     hint_color?: string;
+//                     link_color?: string;
+//                     button_color?: string;
+//                     button_text_color?: string;
+//                     secondary_bg_color?: string;
+//                 };
+//                 initData?: string;
+//                 initDataUnsafe?: {
+//                     user?: {
+//                         id: number;
+//                         first_name: string;
+//                         last_name?: string;
+//                         username?: string;
+//                     };
+//                 };
+//                 showAlert: (message: string) => void;
+//             };
+//         };
+//     }
+// }
 
-export interface FormData {
-    company_name: string;
-    company_email: string;
-    company_description: string;
-    company_phone: string;
-    company_website: string;
-    company_address: string;
-    plan_status: string;
-    plan_start_date: string;
-    plan_end_date: string;
-}
-
-export interface FormErrors {
-    company_name?: string;
-    company_email?: string;
-    company_description?: string;
-    company_phone?: string;
-    company_address?: string;
-    plan_status?: string;
-    plan_start_date?: string;
-    plan_end_date?: string;
-}
-
-interface CompanyFormTelegramProps {
+interface ClientFormTelegramProps {
     telegram_id?: number;
 }
 
-export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegramProps) {
-    const [formData, setFormData] = useState<FormData>({
-        company_name: '',
-        company_email: '',
-        company_description: '',
-        company_phone: '',
-        company_website: '',
-        company_address: 'Togo',
-        plan_status: 'free',
-        plan_start_date: new Date().toISOString().split('T')[0],
-        plan_end_date: addOneMonth(new Date().toISOString().split('T')[0]),
+interface FormData {
+    client_name: string;
+    client_email: string;
+    client_phone?: string;
+    client_cin?: string;
+    client_address?: string;
+}
+
+interface FormErrors {
+    client_name?: string;
+    client_email?: string;
+    client_phone?: string;
+    client_cin?: string;
+    client_address?: string;
+}
+
+export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramProps) {
+    const [formData, setFormData] = React.useState<FormData>({
+        client_name: '',
+        client_email: '',
+        client_phone: '',
+        client_cin: '',
+        client_address: '',
     });
 
-    const [errors, setErrors] = useState<FormErrors>({});
+    const [errors, setErrors] = React.useState<FormErrors>({});
     const [isLoading, setIsLoading] = useState(false);
 
     type TelegramWebApp = NonNullable<NonNullable<typeof window.Telegram>['WebApp']>;
@@ -146,7 +132,6 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
             [name]: value,
         }));
 
-        // Effacer l'erreur du champ
         if (errors[name as keyof FormErrors]) {
             setErrors((prev) => ({
                 ...prev,
@@ -157,26 +142,17 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
 
     const validateFormData = (data: FormData): FormErrors => {
         const newErrors: FormErrors = {};
-
-        if (!data.company_name.trim()) {
-            newErrors.company_name = "Le nom de l'entreprise est requis";
-        } else if (data.company_name.trim().length < 2) {
-            newErrors.company_name = 'Le nom doit contenir au moins 2 caractères';
+        if (!data.client_name.trim()) {
+            newErrors.client_name = 'Le nom du client est requis.';
         }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!data.company_email.trim()) {
-            newErrors.company_email = "L'email est requis";
-        } else if (!emailRegex.test(data.company_email)) {
-            newErrors.company_email = "L'email doit être valide";
+        if (!data.client_email.trim()) {
+            newErrors.client_email = "L'email du client est requis.";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.client_email)) {
+            newErrors.client_email = "L'email du client n'est pas valide.";
         }
-
-        if (!data.company_phone.trim()) {
-            newErrors.company_phone = 'Le téléphone est requis';
-        } else if (data.company_phone.trim().length < 8) {
-            newErrors.company_phone = 'Le téléphone doit contenir au moins 8 caractères';
+        if (!data.client_phone?.trim()) {
+            newErrors.client_phone = 'Le téléphone du client est requis.';
         }
-
         return newErrors;
     };
 
@@ -199,12 +175,11 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
         telegramApp?.MainButton.showProgress();
 
         try {
-            currentData.plan_status = 'free';
             const dataToSend = JSON.stringify(currentData);
 
             if (telegramApp) {
                 const userId = telegramApp.initDataUnsafe?.user?.id || telegram_id;
-                const endpoint = `/api/telegram/company/create/${userId}`;
+                const endpoint = `/api/telegram/client/create/${userId}`;
 
                 fetch(endpoint, {
                     method: 'POST',
@@ -229,9 +204,17 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                                 Object.keys(data.errors).forEach((field) => {
                                     const messages = data.errors[field];
                                     if (Array.isArray(messages)) {
-                                        errorMessage += `• ${field}: ${messages.join(', ')}\n`;
+                                        setErrors((prev) => ({
+                                            ...prev,
+                                            [field]: messages.join(', '),
+                                        }));
+                                        // errorMessage += `• ${field}: ${messages.join(', ')}\n`;
                                     } else {
-                                        errorMessage += `• ${field}: ${messages}\n`;
+                                        setErrors((prev) => ({
+                                            ...prev,
+                                            [field]: messages,
+                                        }));
+                                        // errorMessage += `• ${field}: ${messages}\n`;
                                     }
                                 });
                             } else if (data.message) {
@@ -286,18 +269,18 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
 
                     <div className="space-y-5">
                         <div>
-                            <label htmlFor="company_name" className="mb-2 block text-sm font-semibold">
-                                Nom de l'entreprise <span className="text-red-500">*</span>
+                            <label htmlFor="client_name" className="mb-2 block text-sm font-semibold">
+                                Nom du client <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
-                                id="company_name"
-                                name="company_name"
-                                value={formData.company_name}
+                                id="client_name"
+                                name="client_name"
+                                value={formData.client_name}
                                 onChange={handleChange}
                                 placeholder="Ex: TechSolutions Madagascar"
                                 className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
-                                    errors.company_name ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
+                                    errors.client_name ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
                                 }`}
                                 style={{
                                     backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
@@ -305,94 +288,110 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                                 }}
                                 disabled={isLoading}
                             />
-                            {errors.company_name && (
+                            {errors.client_name && (
                                 <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
-                                    <span>⚠️</span> {errors.company_name}
+                                    <span>⚠️</span> {errors.client_name}
                                 </p>
                             )}
                         </div>
 
                         <div>
-                            <label htmlFor="company_email" className="mb-2 block text-sm font-semibold">
-                                Email professionnel <span className="text-red-500">*</span>
+                            <label htmlFor="client_email" className="mb-2 block text-sm font-semibold">
+                                Email du client <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="email"
-                                id="company_email"
-                                name="company_email"
-                                value={formData.company_email}
+                                id="client_email"
+                                name="client_email"
+                                value={formData.client_email}
                                 onChange={handleChange}
-                                placeholder="contact@techsolutions.mg"
-                                className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
-                                    errors.company_email ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
-                                }`}
+                                placeholder="Ex: 4Hs9O@example.com"
+                                className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 transition-all focus:border-blue-500"
                                 style={{
                                     backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
                                     color: tg?.themeParams?.text_color || '#000000',
                                 }}
                                 disabled={isLoading}
                             />
-                            {errors.company_email && (
+                            {errors.client_email && (
                                 <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
-                                    <span>⚠️</span> {errors.company_email}
+                                    <span>⚠️</span> {errors.client_email}
                                 </p>
                             )}
                         </div>
 
                         <div>
-                            <label htmlFor="company_phone" className="mb-2 block text-sm font-semibold">
-                                Téléphone <span className="text-red-500">*</span>
+                            <label htmlFor="client_phone" className="mb-2 block text-sm font-semibold">
+                                Téléphone du client <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="tel"
-                                id="company_phone"
-                                name="company_phone"
-                                value={formData.company_phone}
+                                id="client_phone"
+                                name="client_phone"
+                                value={formData.client_phone}
                                 onChange={handleChange}
                                 placeholder="Ex: +261 34 12 345 67"
-                                className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
-                                    errors.company_phone ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
-                                }`}
+                                className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 transition-all focus:border-blue-500"
                                 style={{
                                     backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
                                     color: tg?.themeParams?.text_color || '#000000',
                                 }}
                                 disabled={isLoading}
                             />
-                            {errors.company_phone && (
+                            {errors.client_phone && (
                                 <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
-                                    <span>⚠️</span> {errors.company_phone}
+                                    <span>⚠️</span> {errors.client_phone}
                                 </p>
                             )}
                         </div>
 
                         <div>
-                            <label htmlFor="company_description" className="mb-2 block text-sm font-semibold">
-                                Description de l'activité
+                            <label htmlFor="client_cin" className="mb-2 block text-sm font-semibold">
+                                CIN du client
                             </label>
-                            <textarea
-                                id="company_description"
-                                name="company_description"
-                                value={formData.company_description}
+                            <input
+                                type="text"
+                                id="client_cin"
+                                name="client_cin"
+                                value={formData.client_cin}
                                 onChange={handleChange}
-                                placeholder="Décrivez votre activité principale..."
-                                rows={4}
-                                maxLength={500}
-                                className={`w-full resize-y rounded-xl border-2 px-4 py-3 transition-all ${
-                                    errors.company_description ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
-                                }`}
+                                placeholder="Ex: 1 23 456 789"
+                                className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 transition-all focus:border-blue-500"
                                 style={{
                                     backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
                                     color: tg?.themeParams?.text_color || '#000000',
                                 }}
                                 disabled={isLoading}
                             />
-                            {errors.company_description && (
+                            {errors.client_cin && (
                                 <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
-                                    <span>⚠️</span> {errors.company_description}
+                                    <span>⚠️</span> {errors.client_cin}
                                 </p>
                             )}
-                            <p className="mt-1 text-xs opacity-60">{formData.company_description.length} / 500 caractères</p>
+                        </div>
+
+                        <div>
+                            <label htmlFor="client_address" className="mb-2 block text-sm font-semibold">
+                                Adresse du client
+                            </label>
+                            <textarea
+                                id="client_address"
+                                name="client_address"
+                                value={formData.client_address}
+                                onChange={handleChange}
+                                placeholder="Ex: 123 Rue de l'Innovation, Antananarivo"
+                                className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 transition-all focus:border-blue-500"
+                                style={{
+                                    backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
+                                    color: tg?.themeParams?.text_color || '#000000',
+                                }}
+                                disabled={isLoading}
+                            />
+                            {errors.client_address && (
+                                <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
+                                    <span>⚠️</span> {errors.client_address}
+                                </p>
+                            )}
                         </div>
                     </div>
 

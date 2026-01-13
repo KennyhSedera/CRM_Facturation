@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -32,13 +33,12 @@ class TelegramController extends Controller
 
     public function createCompany($id, Request $request, Nutgram $bot)
     {
-        Log::info("Creating company via Telegram WebApp for user ID: $id");
 
         $validator = Validator::make($request->all(), [
             'company_name' => 'required|string|max:255|unique:companies,company_name',
             'company_email' => 'required|email|unique:companies,company_email',
             'company_phone' => 'nullable|string|max:20',
-            'company_website' => 'nullable|url|max:255',
+            'company_website' => 'nullable|max:255',
             'company_address' => 'nullable|string|max:500',
             'company_description' => 'nullable|string',
             'is_active' => 'boolean',
@@ -147,6 +147,88 @@ class TelegramController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error creating company',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function createClient($id, Request $request, Nutgram $bot)
+    {
+        $userId = null;
+        $user = User::where('telegram_id', $id)->first();
+        if ($user) {
+            $userId = $user->id;
+        }
+
+        $validator = Validator::make($request->all(), [
+            'client_name' => 'required|string|max:255',
+            'client_email' => 'required|email|unique:users,email',
+            'client_phone' => 'nullable|string|max:20',
+            'client_cin' => 'nullable|string|max:20',
+            'client_address' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $validated = $validator->validated();
+
+            $client = Client::createClient($validated, $userId, $user->company_id);
+
+            DB::commit();
+
+            $bot->sendMessage(
+                text: "✅ <b>Client créé avec succès !</b>\n\n" .
+                "📌 <b>Nom:</b> " . e($client->client_name) . "\n" .
+                "📧 <b>Email:</b> " . e($client->client_email) . "\n" .
+                "📱 <b>Téléphone:</b> " . e($client->client_phone ?? 'Non renseigné') . "\n" .
+                "🆔 <b>CIN:</b> " . e($client->client_cin ?? 'Non renseigné') . "\n" .
+                "📍 <b>Adresse:</b> " . e($client->client_address ?? 'Non renseignée') . "\n",
+                chat_id: $id,
+                parse_mode: 'HTML'
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Client created successfully',
+                'data' => [
+                    'client_id' => $client->client_id,
+                    'client_name' => $client->client_name,
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error("Error creating client", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'telegram_user_id' => $id
+            ]);
+
+            try {
+                $bot->sendMessage(
+                    text: "❌ <b>Erreur lors de la création du client</b>\n\n" .
+                    "Une erreur s'est produite. Veuillez réessayer plus tard ou contactez le support.",
+                    chat_id: $id,
+                    parse_mode: 'HTML'
+                );
+            } catch (\Exception $botError) {
+                Log::error("Failed to send error message to user", [
+                    'error' => $botError->getMessage()
+                ]);
+            }
+            return response()->json([
+                'success' => false,
+                'message' => 'Error creating client',
                 'error' => $e->getMessage()
             ], 500);
         }

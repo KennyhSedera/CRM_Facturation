@@ -16,11 +16,9 @@ Route::get('/company', function () {
     return Inertia::render('company/formulaire-company-page');
 })->name('company.form');
 
-Route::get('/company/form/telegram', function () {
-    return Inertia::render('company/company-form-telegram');
-})->name('form.telegram');
+Route::get('/webapp/form/company', [WebAppController::class, 'form_company'])->name('webapp.form.company');
+Route::get('/webapp/form/client', [WebAppController::class, 'form_client'])->name('webapp.form.client');
 
-Route::get('/webapp/form', [WebAppController::class, 'form'])->name('webapp.form');
 // ============================================
 // ROUTES AUTHENTIFIÉES (tous les utilisateurs)
 // ============================================

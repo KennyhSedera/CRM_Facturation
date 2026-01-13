@@ -47,7 +47,54 @@ $bot->registerCommand(PendingPaymentsCommand::class);
 $bot->registerCommand(ArticlesCommand::class);
 $bot->registerCommand(MenuCommande::class);
 
-// $bot->onCommand('createcompany', CreateCompanyCommand::class);
+$bot->onCommand('createcompany', function (Nutgram $bot) {
+    if (!User::checkCompanyExistsForUser($bot)) {
+        return;
+    }
+
+    $telegramUser = $bot->user();
+    $webAppUrl = route('webapp.form.company', ['user_id' => $telegramUser->id]);
+
+    $keyboard = InlineKeyboardMarkup::make()
+        ->addRow(
+            InlineKeyboardButton::make(
+                text: '📝 Créer mon entreprise',
+                web_app: new WebAppInfo($webAppUrl)
+            )
+        );
+
+    $bot->sendMessage(
+        text: "🏢 <b>Créer votre entreprise</b>\n\n" .
+        "Cliquez sur le bouton ci-dessous pour remplir le formulaire 👇",
+        parse_mode: ParseMode::HTML,
+        reply_markup: $keyboard
+    );
+});
+
+$bot->onCommand('createclient', function (Nutgram $bot) {
+    $user = User::checkTelegramAccess($bot, requireCompany: true);
+    if (!$user)
+        return;
+
+    $telegramUser = $bot->user();
+    $webAppUrl = route('webapp.form.client', ['user_id' => $telegramUser->id]);
+
+    $keyboard = InlineKeyboardMarkup::make()
+        ->addRow(
+            InlineKeyboardButton::make(
+                text: '📝 Créer mon entreprise',
+                web_app: new WebAppInfo($webAppUrl)
+            )
+        );
+
+    $bot->sendMessage(
+        text: "🏢 <b>Créer votre entreprise</b>\n\n" .
+        "Cliquez sur le bouton ci-dessous pour remplir le formulaire 👇",
+        parse_mode: ParseMode::HTML,
+        reply_markup: $keyboard
+    );
+});
+
 $bot->onCommand('quotes', [AlertCallback::class, 'handle']);
 $bot->onCommand('calculate', [AlertCallback::class, 'handle']);
 $bot->onCommand('settings', [AlertCallback::class, 'handle']);
@@ -546,36 +593,6 @@ $bot->onCallbackQueryData('quote_create_{id}', function (Nutgram $bot, int $id) 
 
 $bot->onCallbackQueryData('menu_settings', function (Nutgram $bot) {
     (new AlertCallback())->handle($bot);
-});
-
-/*
-|--------------------------------------------------------------------------
-| Gestion des company
-|--------------------------------------------------------------------------
-*/
-
-$bot->onCommand('createcompany', function (Nutgram $bot) {
-    if (!User::checkCompanyExistsForUser($bot)) {
-        return;
-    }
-
-    $telegramUser = $bot->user();
-    $webAppUrl = route('webapp.form', ['user_id' => $telegramUser->id]);
-
-    $keyboard = InlineKeyboardMarkup::make()
-        ->addRow(
-            InlineKeyboardButton::make(
-                text: '📝 Créer mon entreprise',
-                web_app: new WebAppInfo($webAppUrl)
-            )
-        );
-
-    $bot->sendMessage(
-        text: "🏢 <b>Créer votre entreprise</b>\n\n" .
-        "Cliquez sur le bouton ci-dessous pour remplir le formulaire 👇",
-        parse_mode: ParseMode::HTML,
-        reply_markup: $keyboard
-    );
 });
 
 /*

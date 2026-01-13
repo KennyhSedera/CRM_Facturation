@@ -22,6 +22,8 @@ Route::prefix('companies')->group(function () {
 
 Route::post('/telegram/company/create/{id}', [TelegramController::class, 'createCompany']);
 
+Route::post('/telegram/client/create/{id}', [TelegramController::class, 'createClient']);
+
 Route::middleware('auth:sanctum')->group(function () {
     // routes clients
     Route::apiResource('clients', ClientController::class);
