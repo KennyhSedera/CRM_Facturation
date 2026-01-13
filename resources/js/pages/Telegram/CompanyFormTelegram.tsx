@@ -223,14 +223,35 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                 })
                     .then((response) => response.json())
                     .then((data) => {
-                        alert('Response data: ' + JSON.stringify(data));
+                        console.log('Response data:', data);
+
                         if (data.success) {
                             telegramApp.showAlert('✅ Entreprise créée avec succès!');
-                            telegramApp.close();
+                            setTimeout(() => {
+                                telegramApp.close();
+                            }, 1000);
                         } else {
-                            telegramApp.showAlert('❌ Une erreur est survenue: ' + (data.errors || 'Erreur inconnue'));
+                            let errorMessage = '❌ Erreur:\n\n';
+
+                            if (data.errors && typeof data.errors === 'object') {
+                                Object.keys(data.errors).forEach((field) => {
+                                    const messages = data.errors[field];
+                                    if (Array.isArray(messages)) {
+                                        errorMessage += `• ${field}: ${messages.join(', ')}\n`;
+                                    } else {
+                                        errorMessage += `• ${field}: ${messages}\n`;
+                                    }
+                                });
+                            } else if (data.message) {
+                                errorMessage += data.message;
+                            } else {
+                                errorMessage += 'Erreur inconnue';
+                            }
+
+                            telegramApp.showAlert(errorMessage);
+                            setIsLoading(false);
+                            telegramApp.MainButton.hideProgress();
                         }
-                        setIsLoading(false);
                     })
                     .catch((error) => {
                         telegramApp.showAlert('❌ Une erreur est survenue: ' + error);
