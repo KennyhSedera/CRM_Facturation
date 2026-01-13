@@ -1,5 +1,4 @@
 // resources/js/Pages/Telegram/CompanyFormTelegram.tsx
-
 import { Head } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -81,7 +80,11 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
 
     const [errors, setErrors] = useState<FormErrors>({});
     const [isLoading, setIsLoading] = useState(false);
-    const [tg, setTg] = useState<NonNullable<typeof window.Telegram>['WebApp'] | null>(null);
+
+    // Type pour Telegram WebApp
+    type TelegramWebApp = NonNullable<NonNullable<typeof window.Telegram>['WebApp']>;
+
+    const [tg, setTg] = useState<TelegramWebApp | null>(null);
     const [showFallbackButton, setShowFallbackButton] = useState(false);
 
     // Référence pour toujours avoir les dernières données
@@ -94,6 +97,8 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
 
     useEffect(() => {
         const telegram = window.Telegram?.WebApp;
+
+        console.log('Telegram WebApp disponible:', !!telegram);
 
         if (telegram) {
             setTg(telegram);
@@ -115,7 +120,7 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
 
             // Handler qui utilise la référence
             const handleSubmitWrapper = () => {
-                handleSubmitAction();
+                handleSubmitAction(telegram);
             };
 
             telegram.MainButton.onClick(handleSubmitWrapper);
@@ -193,17 +198,16 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
         return newErrors;
     };
 
-    const handleSubmitAction = () => {
+    const handleSubmitAction = (telegramApp: TelegramWebApp | null | undefined) => {
         const currentData = formDataRef.current;
-
         const validationErrors = validateFormData(currentData);
 
         if (Object.keys(validationErrors).length > 0) {
             console.log('Erreurs de validation:', validationErrors);
             setErrors(validationErrors);
 
-            if (tg) {
-                tg.showAlert('⚠️ Veuillez corriger les erreurs dans le formulaire');
+            if (telegramApp) {
+                telegramApp.showAlert('⚠️ Veuillez corriger les erreurs dans le formulaire');
             } else {
                 alert('⚠️ Veuillez corriger les erreurs dans le formulaire');
             }
@@ -211,48 +215,51 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
         }
 
         setIsLoading(true);
-        tg?.MainButton.showProgress();
+        telegramApp?.MainButton.showProgress();
 
         try {
             const dataToSend = JSON.stringify(currentData);
-            alert('Données à envoyer: ' + dataToSend);
-            tg?.close();
-            // if (tg) {
-            //     console.log('Envoi via Telegram WebApp...');
-            //     tg.sendData(dataToSend);
-            //     console.log('Données envoyées, fermeture dans 1s...');
+            console.log('Données à envoyer:', dataToSend);
 
-            //     setTimeout(() => {
-            //         console.log('Fermeture de la WebApp');
-            //         tg.close();
-            //     }, 1000);
-            // } else {
-            //     console.error('Telegram WebApp non disponible!');
-            //     alert('❌ Telegram WebApp non disponible. Données: ' + dataToSend);
-            //     setIsLoading(false);
-            // }
+            if (telegramApp) {
+                // Envoyer les données via Telegram
+                telegramApp.sendData(dataToSend);
+
+                // Fermer la WebApp après un court délai
+                setTimeout(() => {
+                    console.log('Fermeture de la WebApp');
+                    telegramApp.close();
+                }, 500);
+            } else {
+                // Mode développement/fallback
+                console.log('Mode fallback - Données:', dataToSend);
+                alert('✅ Entreprise créée! (Mode test)\n\nDonnées: ' + dataToSend);
+                setIsLoading(false);
+            }
         } catch (error) {
             console.error("Erreur lors de l'envoi:", error);
-            if (tg) {
-                tg.showAlert('❌ Une erreur est survenue: ' + error);
+
+            if (telegramApp) {
+                telegramApp.showAlert('❌ Une erreur est survenue: ' + error);
+                telegramApp.MainButton.hideProgress();
             } else {
                 alert('❌ Une erreur est survenue: ' + error);
             }
-            tg?.MainButton.hideProgress();
+
             setIsLoading(false);
         }
     };
 
     const handleSubmit = () => {
-        handleSubmitAction();
+        handleSubmitAction(tg);
     };
 
     return (
         <>
-            <Head title="Créer une entreprise" />
+            <Head title="Créer mon entreprise" />
 
             <div
-                className="min-h-screen p-6 pb-24"
+                className="min-h-screen p-4"
                 style={{
                     backgroundColor: tg?.themeParams?.bg_color || '#ffffff',
                     color: tg?.themeParams?.text_color || '#000000',
@@ -260,11 +267,12 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
             >
                 <div className="mx-auto max-w-2xl">
                     {/* En-tête */}
-                    <div className="mb-8">
+                    <div className="mb-6 text-center">
                         <h1 className="mb-2 text-3xl font-bold">🏢 Créer mon entreprise</h1>
-                        <p className="text-sm opacity-70">Remplissez les informations de votre entreprise</p>
+                        <p className="opacity-70">Remplissez les informations de votre entreprise</p>
                     </div>
 
+                    {/* Formulaire */}
                     <div className="space-y-5">
                         {/* Nom de l'entreprise */}
                         <div>
@@ -277,7 +285,7 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                                 name="company_name"
                                 value={formData.company_name}
                                 onChange={handleChange}
-                                placeholder="Ex: TechSolutions SARL"
+                                placeholder="Ex: TechSolutions Madagascar"
                                 className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
                                     errors.company_name ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
                                 }`}
@@ -305,7 +313,7 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                                 name="company_email"
                                 value={formData.company_email}
                                 onChange={handleChange}
-                                placeholder="Ex: contact@techsolutions.mg"
+                                placeholder="contact@techsolutions.mg"
                                 className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
                                     errors.company_email ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
                                 }`}
@@ -332,8 +340,9 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                                 name="company_description"
                                 value={formData.company_description}
                                 onChange={handleChange}
-                                placeholder="Ex: Développement de solutions web et mobile pour entreprises"
+                                placeholder="Décrivez votre activité principale..."
                                 rows={4}
+                                maxLength={500}
                                 className={`w-full resize-y rounded-xl border-2 px-4 py-3 transition-all ${
                                     errors.company_description ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
                                 }`}
@@ -429,17 +438,39 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
                         </div>
                     </div>
 
+                    {/* Bouton fallback (si MainButton ne s'affiche pas) */}
+                    {showFallbackButton && (
+                        <button
+                            onClick={handleSubmit}
+                            disabled={isLoading}
+                            className="mt-6 w-full rounded-xl bg-blue-500 px-6 py-4 font-semibold text-white transition-all hover:bg-blue-600 disabled:opacity-50"
+                            style={{
+                                backgroundColor: tg?.themeParams?.button_color || '#3390ec',
+                                color: tg?.themeParams?.button_text_color || '#ffffff',
+                            }}
+                        >
+                            {isLoading ? '⏳ Envoi en cours...' : "✅ Créer l'entreprise"}
+                        </button>
+                    )}
+
                     {/* Info en bas */}
                     <div className="mt-8 rounded-xl border-2 border-blue-200 bg-blue-50 p-4">
                         <p className="flex items-start gap-2 text-sm text-blue-800">
                             <span className="text-lg">ℹ️</span>
                             <span>
                                 {showFallbackButton
-                                    ? 'Cliquez sur le bouton ci-dessous pour créer votre entreprise'
+                                    ? 'Cliquez sur le bouton ci-dessus pour créer votre entreprise'
                                     : "Cliquez sur le bouton en bas de l'écran pour créer votre entreprise"}
                             </span>
                         </p>
                     </div>
+
+                    {/* Debug info (à retirer en production) */}
+                    {!tg && (
+                        <div className="mt-4 rounded-xl border-2 border-yellow-200 bg-yellow-50 p-4">
+                            <p className="text-sm text-yellow-800">⚠️ Mode développement: Telegram WebApp non détecté</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </>
