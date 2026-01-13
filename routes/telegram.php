@@ -555,23 +555,11 @@ $bot->onCallbackQueryData('menu_settings', function (Nutgram $bot) {
 */
 
 $bot->onCommand('createcompany', function (Nutgram $bot) {
-    $telegramUser = $bot->user();
-
-    $user = User::checkCompanyExistsForUser($bot);
-    if (!$user)
-        return;
-
-    $user = User::where('telegram_id', $telegramUser->id)->first();
-
-    if ($user && $user->company_id) {
-        $bot->sendMessage(
-            text: "ℹ️ <b>Vous avez déjà une entreprise</b>\n\n" .
-            "Utilisez /profile pour voir vos informations.",
-            parse_mode: ParseMode::HTML
-        );
+    if (!User::checkCompanyExistsForUser($bot)) {
         return;
     }
 
+    $telegramUser = $bot->user();
     $webAppUrl = route('webapp.form', ['user_id' => $telegramUser->id]);
 
     $keyboard = InlineKeyboardMarkup::make()

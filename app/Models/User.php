@@ -218,7 +218,7 @@ class User extends Authenticatable
                 "ℹ️ <b>Entreprise existante</b>\n\n"
                 . "Vous êtes déjà membre de l'entreprise:\n"
                 . "📌 <b>Nom:</b> " . e($company->company_name) . "\n"
-                . "📧 <b>Email:</b> " . e($company->company_email) . "\n"
+                . "📧 <b>Email:</b> " . e($company->company_email) . "\n\n"
                 . "Vous ne pouvez pas créer une nouvelle entreprise.",
                 parse_mode: ParseMode::HTML
             );
