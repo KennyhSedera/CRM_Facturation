@@ -48,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/pdf', [PdfController::class, 'generate']);
 
 Route::get('/clients/company/{id}', [ClientController::class, 'getByCompany']);
+Route::get('/articles/company/{id}', [ArticleController::class, 'index']);
 
 
 Route::post('/login', [AuthController::class, 'login']);

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class CompanyController extends Controller
 {
@@ -35,9 +36,18 @@ class CompanyController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'company_name' => 'required|string|max:255|unique:companies,company_name',
-            'company_email' => 'required|email|unique:companies,company_email',
+            'company_email' => [
+                'required',
+                'email',
+                Rule::unique('companies', 'company_email'),
+                function ($attribute, $value, $fail) {
+                    if (User::where('email', $value)->exists()) {
+                        $fail('Cet email est déjà utilisé par un utilisateur.');
+                    }
+                }
+            ],
             'company_phone' => 'nullable|string|max:20',
-            'company_website' => 'nullable|url|max:255',
+            'company_website' => 'nullable|max:255',
             'company_address' => 'nullable|string|max:255',
             'company_city' => 'nullable|string|max:100',
             'company_postal_code' => 'nullable|string|max:20',
@@ -52,6 +62,56 @@ class CompanyController extends Controller
             'company_currency' => 'nullable|string|max:3',
             'company_timezone' => 'nullable|string|max:50',
             'is_active' => 'boolean',
+        ], [
+            'company_name.required' => 'Le nom de l’entreprise est obligatoire.',
+            'company_name.string' => 'Le nom de l’entreprise doit être une chaîne de caractères.',
+            'company_name.max' => 'Le nom de l’entreprise ne peut pas dépasser 255 caractères.',
+            'company_name.unique' => 'Ce nom d’entreprise existe déjà.',
+
+            'company_email.required' => 'L’email de l’entreprise est obligatoire.',
+            'company_email.email' => 'L’email de l’entreprise doit être une adresse valide.',
+            'company_email.unique' => 'Cet email est déjà utilisé.',
+
+            'company_phone.string' => 'Le téléphone doit être une chaîne de caractères.',
+            'company_phone.max' => 'Le téléphone ne peut pas dépasser 20 caractères.',
+
+            'company_website.max' => 'Le site web ne peut pas dépasser 255 caractères.',
+
+            'company_address.string' => 'L’adresse doit être une chaîne de caractères.',
+            'company_address.max' => 'L’adresse ne peut pas dépasser 255 caractères.',
+
+            'company_city.string' => 'La ville doit être une chaîne de caractères.',
+            'company_city.max' => 'La ville ne peut pas dépasser 100 caractères.',
+
+            'company_postal_code.string' => 'Le code postal doit être une chaîne de caractères.',
+            'company_postal_code.max' => 'Le code postal ne peut pas dépasser 20 caractères.',
+
+            'company_country.string' => 'Le pays doit être une chaîne de caractères.',
+            'company_country.max' => 'Le pays ne peut pas dépasser 100 caractères.',
+
+            'company_registration_number.string' => 'Le numéro d’enregistrement doit être une chaîne.',
+            'company_registration_number.max' => 'Le numéro d’enregistrement ne peut pas dépasser 100 caractères.',
+
+            'company_tax_number.string' => 'Le numéro de TVA doit être une chaîne.',
+            'company_tax_number.max' => 'Le numéro de TVA ne peut pas dépasser 100 caractères.',
+
+            'company_logo.image' => 'Le logo doit être une image.',
+            'company_logo.mimes' => 'Le logo doit être au format jpeg, png, jpg ou svg.',
+            'company_logo.max' => 'Le logo ne peut pas dépasser 2 Mo.',
+
+            'plan_status.in' => 'Le statut du plan doit être : free, premium, entreprise ou basic.',
+
+            'plan_start_date.date' => 'La date de début du plan doit être une date valide.',
+            'plan_end_date.date' => 'La date de fin du plan doit être une date valide.',
+            'plan_end_date.after' => 'La date de fin doit être après la date de début.',
+
+            'company_currency.string' => 'La devise doit être une chaîne de caractères.',
+            'company_currency.max' => 'La devise ne peut pas dépasser 3 caractères.',
+
+            'company_timezone.string' => 'Le fuseau horaire doit être une chaîne de caractères.',
+            'company_timezone.max' => 'Le fuseau horaire ne peut pas dépasser 50 caractères.',
+
+            'is_active.boolean' => 'Le statut actif doit être vrai ou faux.',
         ]);
 
         if ($validator->fails()) {
@@ -71,8 +131,8 @@ class CompanyController extends Controller
                 $validated['company_logo'] = $request->file('company_logo')->store('company-logos', 'public');
             }
 
-            $validated['is_active'] = $request->has('is_active') ? true : false;
-            $validated['plan_status'] = $validated['plan_status'] ?? 'trial';
+            $validated['is_active'] = true;
+            $validated['plan_status'] = $validated['plan_status'] ?? 'free';
 
             $company = Company::create($validated);
 
@@ -83,7 +143,6 @@ class CompanyController extends Controller
                 'company_id' => $company->company_id,
                 'user_role' => 'admin_company',
             ]);
-
 
             DB::commit();
 

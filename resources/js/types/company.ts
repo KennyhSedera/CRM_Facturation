@@ -21,6 +21,26 @@ export interface CompanyFormData {
     [key: string]: string | File | null | PlanStatus;
 }
 
+export type CompanyFormFields =
+  | 'company_name'
+  | 'company_email'
+  | 'plan_status'
+  | 'company_description'
+  | 'company_phone'
+  | 'company_website'
+  | 'company_address'
+  | 'company_city'
+  | 'company_postal_code'
+  | 'company_country'
+  | 'company_registration_number'
+  | 'company_tax_number'
+  | 'company_logo'
+  | 'plan_start_date'
+  | 'plan_end_date'
+  | 'company_currency'
+  | 'company_timezone'
+  | 'is_active';
+
 // Interface pour la pagination des entreprises
 export interface PaginatedCompanies {
     data: Company[];

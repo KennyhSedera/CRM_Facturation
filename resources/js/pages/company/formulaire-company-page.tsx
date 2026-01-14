@@ -95,15 +95,6 @@ export default function Create() {
             }
         });
 
-        console.log('=== Données envoyées ===');
-        for (let pair of formData.entries()) {
-            if (pair[1] instanceof File) {
-                console.log(pair[0], '→ File:', pair[1].name, '(' + pair[1].size + ' bytes)');
-            } else {
-                console.log(pair[0], '→', pair[1]);
-            }
-        }
-
         try {
             const response = await axios.post('/api/companies', formData, {
                 headers: {
@@ -117,8 +108,6 @@ export default function Create() {
             });
 
             const result = response.data;
-
-            console.log('✅ Réponse du serveur:', result);
 
             if (result.success) {
                 setSubmitSuccess(result.message || 'Entreprise créée avec succès !');
@@ -137,21 +126,16 @@ export default function Create() {
                     window.location.href = redirectUrl;
                 }, 2000);
             } else {
-                // Cas où la réponse est 200 mais success = false
                 if (result.errors) {
-                    console.log('❌ Erreurs de validation:', result.errors);
-
-                    Object.keys(result.errors).forEach((key) => {
-                        const errorMessage = Array.isArray(result.errors[key]) ? result.errors[key][0] : result.errors[key];
-                        console.log(errorMessage);
-
-                        // setError(key as any, { type: 'manual', message: errorMessage });
+                    Object.entries(result.errors).forEach(([key, value]) => {
+                        const message: string = Array.isArray(value) ? value[0] : value;
+                        setError(key as any, message);
                     });
-                    setSubmitError(result.message || 'Erreur de validation');
                     setCurrentStep(1);
                 } else {
                     setSubmitError(result.message || 'Une erreur est survenue');
                 }
+
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         } catch (error) {
@@ -166,13 +150,10 @@ export default function Create() {
                     const result = error.response.data;
 
                     if (result.errors) {
-                        console.log('❌ Erreurs de validation:', result.errors);
-
                         Object.keys(result.errors).forEach((key) => {
                             const errorMessage = Array.isArray(result.errors[key]) ? result.errors[key][0] : result.errors[key];
-                            console.log(errorMessage);
+                            setError(key as any, errorMessage);
                         });
-                        setSubmitError(result.message || 'Erreur de validation');
                         setCurrentStep(1);
                     } else {
                         setSubmitError(result.message || `Erreur ${error.response.status}: ${error.response.statusText}`);
@@ -186,7 +167,6 @@ export default function Create() {
                     setSubmitError('Erreur lors de la préparation de la requête.');
                 }
             } else {
-                // Erreur non-Axios
                 console.error('❌ Erreur inattendue:', error);
                 setSubmitError('Une erreur inattendue est survenue. Veuillez réessayer.');
             }
@@ -252,7 +232,6 @@ export default function Create() {
         { value: 'Guinée', label: 'Guinée' },
     ];
 
-    // Fonction de validation pour chaque étape
     const validateStep = (step: number): boolean => {
         const newErrors: any = {};
 
