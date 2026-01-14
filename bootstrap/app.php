@@ -39,12 +39,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->redirectGuestsTo(fn(Request $request) => route('login'));
         $middleware->redirectUsersTo(fn(Request $request) => route('dashboard'));
-
         $middleware->alias([
-            'role' => CheckRole::class,
-            'permission' => CheckPermission::class,
+            'auth:sanctum' => EnsureFrontendRequestsAreStateful::class,
         ]);
-
         // $middleware->throttleApi();
     
         $middleware->group('admin', [

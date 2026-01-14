@@ -126,15 +126,15 @@ class MvtArticlesController extends Controller
         $mvt = MvtArticle::find($id);
 
         if (!$mvt) {
-            return response()->json([
+            return response()->json(data: [
                 'success' => false,
                 'message' => 'Mouvement non trouvé'
-            ], 404);
+            ], status: 404);
         }
 
         $mvt->delete();
 
-        return response()->json([
+        return response()->json(data: [
             'success' => true,
             'message' => 'Mouvement supprimé avec succès'
         ]);

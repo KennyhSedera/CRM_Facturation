@@ -36,7 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('articles', ArticleController::class);
 
     // routes mvt article
-    Route::apiResource('mvt_articles', MvtArticlesController::class);
+    Route::apiResource('mvt-articles', MvtArticlesController::class);
 
     // routes quote
     Route::apiResource('quotes', QuoteController::class);

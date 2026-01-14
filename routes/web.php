@@ -53,7 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // ROUTES ADMIN DE COMPAGNIE (admin_company OU super_admin)
 // ============================================
 
-Route::middleware(['auth', 'verified', 'role:admin_company,super_admin'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/company/profile', function () {
         return Inertia::render('company/company-profile');
@@ -72,7 +72,7 @@ Route::middleware(['auth', 'verified', 'role:admin_company,super_admin'])->group
 // ROUTES SUPER ADMIN UNIQUEMENT
 // ============================================
 
-Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/companies', function () {
         return Inertia::render('company/company-page');

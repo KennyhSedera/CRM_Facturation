@@ -51,12 +51,12 @@ class MvtArticle extends Model
     // Relation avec l'utilisateur
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     // Relation avec l'article
     public function article()
     {
-        return $this->belongsTo(Article::class);
+        return $this->belongsTo(Article::class, 'article_id', 'article_id');
     }
 }

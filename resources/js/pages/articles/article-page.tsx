@@ -130,7 +130,7 @@ const ArticlePage = () => {
                                         placeholder="Rechercher par nom, référence ou source..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full rounded-lg border border-gray-300 bg-white py-3 pr-4 pl-10 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-black dark:text-gray-100 dark:placeholder-gray-400"
+                                        className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-black dark:text-gray-100 dark:placeholder-gray-400"
                                     />
                                     {searchTerm && (
                                         <button
@@ -152,7 +152,7 @@ const ArticlePage = () => {
                             </div>
 
                             {!loading && filteredArticles.length > 0 && (
-                                <div className="mt-2 flex items-center gap-2 lg:ml-4">
+                                <div className="flex items-center gap-2 lg:ml-4">
                                     <label className="text-sm whitespace-nowrap text-gray-600 dark:text-gray-400">Articles par page:</label>
                                     <select
                                         value={itemsPerPage}
@@ -185,7 +185,7 @@ const ArticlePage = () => {
                 </div>
 
                 {/* Content Section */}
-                <div className="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-white/15">
+                <div className="overflow-hidden rounded-xl bg-gray-50 shadow-sm dark:bg-white/15">
                     {loading && (
                         <div className="flex items-center justify-center py-16">
                             <div className="text-center">
@@ -197,7 +197,7 @@ const ArticlePage = () => {
 
                     {!loading && articles.length === 0 && (
                         <div className="py-16 text-center">
-                            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800">
                                 <svg className="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path
                                         strokeLinecap="round"
@@ -214,7 +214,7 @@ const ArticlePage = () => {
 
                     {!loading && articles.length > 0 && filteredArticles.length === 0 && (
                         <div className="py-16 text-center">
-                            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800">
                                 <svg className="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path
                                         strokeLinecap="round"
@@ -276,7 +276,7 @@ const ArticlePage = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                                                    <span className="inline-flex rounded-full bg-gray-50 px-3 py-1 text-sm font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">
                                                         {article.article_reference}
                                                     </span>
                                                 </td>
