@@ -186,12 +186,6 @@ export default function CompanyFormTelegram({ telegram_id }: CompanyFormTelegram
 
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
-
-            if (telegramApp) {
-                telegramApp.showAlert('⚠️ Veuillez corriger les erreurs dans le formulaire');
-            } else {
-                alert('⚠️ Veuillez corriger les erreurs dans le formulaire');
-            }
             return;
         }
 

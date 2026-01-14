@@ -130,12 +130,6 @@ export default function ArticleFormTelegram({ telegram_id }: ArticleFormTelegram
 
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
-
-            if (telegramApp) {
-                telegramApp.showAlert('⚠️ Veuillez corriger les erreurs dans le formulaire');
-            } else {
-                alert('⚠️ Veuillez corriger les erreurs dans le formulaire');
-            }
             return;
         }
 
@@ -287,7 +281,7 @@ export default function ArticleFormTelegram({ telegram_id }: ArticleFormTelegram
                             <label htmlFor="selling_price" className="mb-2 block text-sm font-semibold">
                                 Prix unitaire de l'article <span className="text-red-500">*</span>
                             </label>
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between gap-2">
                                 <input
                                     type="text"
                                     id="selling_price"
@@ -304,7 +298,15 @@ export default function ArticleFormTelegram({ telegram_id }: ArticleFormTelegram
                                     }}
                                     disabled={isLoading}
                                 />
-                                <span>FCFA</span>
+                                <span
+                                    className="rounded-xl border-2 px-4 py-3"
+                                    style={{
+                                        backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
+                                        color: tg?.themeParams?.text_color || '#000000',
+                                    }}
+                                >
+                                    FCFA
+                                </span>
                             </div>
                             {errors.selling_price && (
                                 <p className="mt-1 flex items-center gap-1 text-sm text-red-500">

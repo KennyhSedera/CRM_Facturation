@@ -1,50 +1,6 @@
 import { Head } from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from 'react';
 
-// // declare global {
-//     interface Window {
-//         Telegram?: {
-//             WebApp?: {
-//                 ready: () => void;
-//                 expand: () => void;
-//                 close: () => void;
-//                 sendData: (data: string) => void;
-//                 enableClosingConfirmation: () => void;
-//                 MainButton: {
-//                     setText: (text: string) => void;
-//                     show: () => void;
-//                     hide: () => void;
-//                     showProgress: () => void;
-//                     hideProgress: () => void;
-//                     onClick: (callback: () => void) => void;
-//                     offClick: (callback: () => void) => void;
-//                     color: string;
-//                     textColor: string;
-//                 };
-//                 themeParams?: {
-//                     bg_color?: string;
-//                     text_color?: string;
-//                     hint_color?: string;
-//                     link_color?: string;
-//                     button_color?: string;
-//                     button_text_color?: string;
-//                     secondary_bg_color?: string;
-//                 };
-//                 initData?: string;
-//                 initDataUnsafe?: {
-//                     user?: {
-//                         id: number;
-//                         first_name: string;
-//                         last_name?: string;
-//                         username?: string;
-//                     };
-//                 };
-//                 showAlert: (message: string) => void;
-//             };
-//         };
-//     }
-// }
-
 interface ClientFormTelegramProps {
     telegram_id?: number;
 }
@@ -162,12 +118,6 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
 
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
-
-            if (telegramApp) {
-                telegramApp.showAlert('⚠️ Veuillez corriger les erreurs dans le formulaire');
-            } else {
-                alert('⚠️ Veuillez corriger les erreurs dans le formulaire');
-            }
             return;
         }
 
