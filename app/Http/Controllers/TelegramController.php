@@ -366,7 +366,8 @@ class TelegramController extends Controller
 
             DB::commit();
 
-            $message = "✅ <b>Client créé avec succès !</b>\n\n";
+            $message = "✅ <b>Article créé avec succès !</b>\n\n" .
+                $article->formatForDisplay();
 
             $keyboard = InlineKeyboardMarkup::make()
                 ->addRow(

@@ -69,4 +69,14 @@ class Article extends Model
         return $this->belongsTo(Company::class, 'company_id', 'company_id');
     }
 
+    public function formatForDisplay()
+    {
+        return "<b>Nom de l'article :</b> {$this->article_name}\n" .
+            "<b>Référence :</b> {$this->article_reference}\n" .
+            "<b>Source :</b> " . ($this->article_source ?? 'N/A') . "\n" .
+            "<b>Unité :</b> " . ($this->article_unité ?? 'N/A') . "\n" .
+            "<b>Prix de vente :</b> {$this->selling_price}\n" .
+            "<b>TVA :</b> {$this->article_tva}\n" .
+            "<b>Quantité en stock :</b> {$this->quantity_stock}\n";
+    }
 }

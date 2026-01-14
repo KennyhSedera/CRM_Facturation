@@ -106,7 +106,7 @@ export default function ArticleFormTelegram({ telegram_id }: ArticleFormTelegram
         }
 
         if (!data.selling_price || isNaN(data.selling_price) || data.selling_price <= 0) {
-            newErrors.selling_price = "Le prix unitaire de l'article doit être un nombre positif.";
+            newErrors.selling_price = "Le prix unitaire de l'article est obligatoire.";
         }
 
         if (!data.article_unité || !data.article_unité.trim()) {
