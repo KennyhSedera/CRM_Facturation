@@ -306,6 +306,7 @@ class TelegramController extends Controller
             'quantity_stock' => 'nullable|numeric|min:0',
         ], [
             'article_name.required' => 'Le nom de l’article est obligatoire.',
+            'article_name.unique' => 'Un article avec ce nom existe déjà.',
             'selling_price.required' => 'Le prix de vente est obligatoire.',
             'selling_price.min' => 'Le prix de vente doit être supérieur à 0.',
             'selling_price.numeric' => 'Le prix doit être un nombre.',
