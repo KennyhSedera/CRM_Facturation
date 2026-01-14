@@ -299,15 +299,17 @@ class TelegramController extends Controller
 
         $validator = Validator::make($request->all(), [
             'article_name' => 'required|string|max:255|unique:articles,article_name',
-            'selling_price' => 'required|numeric|min:0',
+            'selling_price' => 'required|numeric|min:1',
             'article_reference' => 'nullable|string|max:20',
-            'article_unité' => 'nullable|string|max:20',
+            'article_unité' => 'required|string|max:20',
             'article_tva' => 'nullable|numeric|min:0|max:100',
             'quantity_stock' => 'nullable|numeric|min:0',
         ], [
             'article_name.required' => 'Le nom de l’article est obligatoire.',
             'selling_price.required' => 'Le prix de vente est obligatoire.',
+            'selling_price.min' => 'Le prix de vente doit être supérieur à 0.',
             'selling_price.numeric' => 'Le prix doit être un nombre.',
+            'article_unité.required' => 'L\'unité de l\'article est obligatoire.',
             'article_tva.max' => 'La TVA doit être comprise entre 0 et 100%.',
         ]);
 

@@ -16,10 +16,10 @@ interface FormData {
 
 interface FormErrors {
     article_name?: string;
-    selling_price?: number;
+    selling_price?: string;
     article_unité?: string;
-    article_tva?: number;
-    quantity_stock?: number;
+    article_tva?: string;
+    quantity_stock?: string;
     article_reference?: string;
 }
 
@@ -104,6 +104,23 @@ export default function ArticleFormTelegram({ telegram_id }: ArticleFormTelegram
         if (!data.article_name.trim()) {
             newErrors.article_name = "Le nom de l'article est requis.";
         }
+
+        if (!data.selling_price || isNaN(data.selling_price) || data.selling_price <= 0) {
+            newErrors.selling_price = "Le prix unitaire de l'article doit être un nombre positif.";
+        }
+
+        if (!data.article_unité || !data.article_unité.trim()) {
+            newErrors.article_unité = "L'unité de l'article est obligatoire.";
+        }
+
+        if (data.article_tva === undefined || isNaN(data.article_tva) || data.article_tva < 0) {
+            newErrors.article_tva = "La TVA de l'article doit être un nombre positif.";
+        }
+
+        if (data.quantity_stock === undefined || isNaN(data.quantity_stock) || data.quantity_stock < 0) {
+            newErrors.quantity_stock = 'La quantité en stock doit être un nombre positif.';
+        }
+
         return newErrors;
     };
 
@@ -222,7 +239,7 @@ export default function ArticleFormTelegram({ telegram_id }: ArticleFormTelegram
                                 name="article_name"
                                 value={formData.article_name}
                                 onChange={handleChange}
-                                placeholder="Ex: TechSolutions Madagascar"
+                                placeholder="Ex: Panneau solaire 100W"
                                 className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
                                     errors.article_name ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
                                 }`}
@@ -249,7 +266,7 @@ export default function ArticleFormTelegram({ telegram_id }: ArticleFormTelegram
                                 name="article_reference"
                                 value={formData.article_reference}
                                 onChange={handleChange}
-                                placeholder="Ex: TechSolutions Madagascar"
+                                placeholder="Ex: ART-001"
                                 className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
                                     errors.article_reference ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
                                 }`}
@@ -306,7 +323,7 @@ export default function ArticleFormTelegram({ telegram_id }: ArticleFormTelegram
                                 name="article_unité"
                                 value={formData.article_unité}
                                 onChange={handleChange}
-                                placeholder="Ex: TechSolutions Madagascar"
+                                placeholder="Ex: Pièce"
                                 className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
                                     errors.article_unité ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
                                 }`}
@@ -333,7 +350,7 @@ export default function ArticleFormTelegram({ telegram_id }: ArticleFormTelegram
                                 name="article_tva"
                                 value={formData.article_tva}
                                 onChange={handleChange}
-                                placeholder="Ex: TechSolutions Madagascar"
+                                placeholder="Ex: 10"
                                 className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
                                     errors.article_tva ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
                                 }`}
@@ -360,7 +377,7 @@ export default function ArticleFormTelegram({ telegram_id }: ArticleFormTelegram
                                 name="quantity_stock"
                                 value={formData.quantity_stock}
                                 onChange={handleChange}
-                                placeholder="Ex: TechSolutions Madagascar"
+                                placeholder="Ex: 100"
                                 className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
                                     errors.quantity_stock ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
                                 }`}

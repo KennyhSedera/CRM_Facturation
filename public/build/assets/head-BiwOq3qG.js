@@ -1,0 +1,1 @@
+import{u as c,j as a,H as p}from"./app-jMEiN9C4.js";const l=({title:e,favicon:n})=>{const o=c().props.auth?.user?.company,s=o?.company_name?`${e} - ${o.company_name}`:`${e} - FacturePro`,r=o?.company_logo?`/storage/${o.company_logo}`:n||"/facture-pro.png";return a.jsxs(p,{children:[a.jsx("title",{children:s}),a.jsx("link",{rel:"icon",type:"image/png",href:r})]})};export{l as H};
