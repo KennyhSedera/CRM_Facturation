@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Article;
 use App\Models\Client;
 use App\Models\Company;
+use App\Models\MvtArticle;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -281,6 +284,128 @@ class TelegramController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error creating client',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function createArticle($id, Request $request, Nutgram $bot)
+    {
+        $userId = null;
+        $user = User::where('telegram_id', $id)->first();
+        if ($user) {
+            $userId = $user->id;
+        }
+
+        $validator = Validator::make($request->all(), [
+            'article_name' => 'required|string|max:255|unique:articles,article_name',
+            'selling_price' => 'required|numeric|min:0',
+            'article_reference' => 'nullable|string|max:20',
+            'article_unité' => 'nullable|string|max:20',
+            'article_tva' => 'nullable|numeric|min:0|max:100',
+            'quantity_stock' => 'nullable|numeric|min:0',
+        ], [
+            'article_name.required' => 'Le nom de l’article est obligatoire.',
+            'selling_price.required' => 'Le prix de vente est obligatoire.',
+            'selling_price.numeric' => 'Le prix doit être un nombre.',
+            'article_tva.max' => 'La TVA doit être comprise entre 0 et 100%.',
+        ]);
+
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = User::where('telegram_id', $id)->first();
+
+        $reference = 'ART-' . strtoupper(substr(md5(uniqid()), 0, 8));
+
+        DB::beginTransaction();
+
+        try {
+            $validated = $validator->validated();
+
+            $tva = isset($validated['article_tva']) && is_numeric($validated['article_tva'])
+                ? (float) $validated['article_tva']
+                : 0;
+
+            if ($tva < 0 || $tva > 100) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La TVA doit être entre 0 et 100%',
+                    'errors' => [
+                        'article_tva' => ['La TVA doit être entre 0 et 100%']
+                    ]
+                ], 422);
+            }
+
+            $validated['user_id'] = $userId;
+            $validated['company_id'] = $user->company_id;
+            $validated['article_reference'] = $reference;
+            $validated['article_tva'] = $tva;
+            $validated['article_source'] = $validated['article_source'] ?? 'Catalogue';
+
+
+            $article = Article::create($validated);
+
+            $entree = [
+                'mvtType' => 'entree',
+                'mvt_quantity' => $validated['quantity_stock'],
+                'mvt_date' => Carbon::now(),
+                'article_id' => $article->article_id,
+                'user_id' => $userId,
+            ];
+
+            MvtArticle::create($entree);
+
+            DB::commit();
+
+            $message = "✅ <b>Client créé avec succès !</b>\n\n";
+
+            $keyboard = InlineKeyboardMarkup::make()
+                ->addRow(
+                    InlineKeyboardButton::make('📦 Voir l\'article', callback_data: "article_view_{$article->article_id}"),
+                    InlineKeyboardButton::make('📋 Tous les articles', callback_data: 'article_list')
+                )
+                ->addRow(
+                    InlineKeyboardButton::make('🏢 Menu Principal', callback_data: 'menu_back')
+                );
+
+            $bot->sendMessage($message, chat_id: $id, parse_mode: 'HTML', reply_markup: $keyboard);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Article created successfully',
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error("Error creating article", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'telegram_user_id' => $id
+            ]);
+
+            try {
+                $bot->sendMessage(
+                    text: "❌ <b>Erreur lors de la création du article</b>\n\n" .
+                    "Une erreur s'est produite. Veuillez réessayer plus tard ou contactez le support.",
+                    chat_id: $id,
+                    parse_mode: 'HTML'
+                );
+            } catch (\Exception $botError) {
+                Log::error("Failed to send error message to user", [
+                    'error' => $botError->getMessage()
+                ]);
+            }
+            return response()->json([
+                'success' => false,
+                'message' => 'Error creating article',
                 'error' => $e->getMessage()
             ], 500);
         }

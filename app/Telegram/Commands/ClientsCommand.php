@@ -364,7 +364,7 @@ class ClientCallbackHandler
             return;
 
         $user = User::where('telegram_id', $bot->user()->id)->with('company')->first();
-        $clientCount = Client::where('company_id', '=', $user->company_id, true)->count();
+        $clientCount = Client::where('company_id', $user->company_id)->count();
 
         $message = "👥 <b>Gestion des Clients</b>\n\n"
             . "📊 Vous avez <b>{$clientCount} client(s)</b>\n\n"

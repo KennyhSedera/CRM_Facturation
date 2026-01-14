@@ -24,6 +24,8 @@ Route::post('/telegram/company/create/{id}', [TelegramController::class, 'create
 
 Route::post('/telegram/client/create/{id}', [TelegramController::class, 'createClient']);
 
+Route::post('/telegram/article/create/{id}', [TelegramController::class, 'createArticle']);
+
 Route::middleware('auth:sanctum')->group(function () {
     // routes clients
     Route::apiResource('clients', ClientController::class);

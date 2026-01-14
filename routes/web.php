@@ -18,6 +18,7 @@ Route::get('/company', function () {
 
 Route::get('/webapp/form/company', [WebAppController::class, 'form_company'])->name('webapp.form.company');
 Route::get('/webapp/form/client', [WebAppController::class, 'form_client'])->name('webapp.form.client');
+Route::get('/webapp/form/article', [WebAppController::class, 'form_article'])->name('webapp.form.article');
 
 // ============================================
 // ROUTES AUTHENTIFIÉES (tous les utilisateurs)

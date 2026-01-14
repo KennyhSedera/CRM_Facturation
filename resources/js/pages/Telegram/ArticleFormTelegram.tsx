@@ -1,77 +1,36 @@
 import { Head } from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from 'react';
 
-// // declare global {
-//     interface Window {
-//         Telegram?: {
-//             WebApp?: {
-//                 ready: () => void;
-//                 expand: () => void;
-//                 close: () => void;
-//                 sendData: (data: string) => void;
-//                 enableClosingConfirmation: () => void;
-//                 MainButton: {
-//                     setText: (text: string) => void;
-//                     show: () => void;
-//                     hide: () => void;
-//                     showProgress: () => void;
-//                     hideProgress: () => void;
-//                     onClick: (callback: () => void) => void;
-//                     offClick: (callback: () => void) => void;
-//                     color: string;
-//                     textColor: string;
-//                 };
-//                 themeParams?: {
-//                     bg_color?: string;
-//                     text_color?: string;
-//                     hint_color?: string;
-//                     link_color?: string;
-//                     button_color?: string;
-//                     button_text_color?: string;
-//                     secondary_bg_color?: string;
-//                 };
-//                 initData?: string;
-//                 initDataUnsafe?: {
-//                     user?: {
-//                         id: number;
-//                         first_name: string;
-//                         last_name?: string;
-//                         username?: string;
-//                     };
-//                 };
-//                 showAlert: (message: string) => void;
-//             };
-//         };
-//     }
-// }
-
-interface ClientFormTelegramProps {
+interface ArticleFormTelegramProps {
     telegram_id?: number;
 }
 
 interface FormData {
-    client_name: string;
-    client_email: string;
-    client_phone?: string;
-    client_cin?: string;
-    client_adress?: string;
+    article_name: string;
+    selling_price: number;
+    article_unité?: string;
+    article_tva?: number;
+    quantity_stock?: number;
+    article_reference?: string;
 }
 
 interface FormErrors {
-    client_name?: string;
-    client_email?: string;
-    client_phone?: string;
-    client_cin?: string;
-    client_adress?: string;
+    article_name?: string;
+    selling_price?: number;
+    article_unité?: string;
+    article_tva?: number;
+    quantity_stock?: number;
+    article_reference?: string;
 }
 
-export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramProps) {
+export default function ArticleFormTelegram({ telegram_id }: ArticleFormTelegramProps) {
     const [formData, setFormData] = React.useState<FormData>({
-        client_name: '',
-        client_email: '',
-        client_phone: '',
-        client_cin: '',
-        client_adress: '',
+        article_name: '',
+        selling_price: 0,
+        article_unité: '',
+        article_tva: 0,
+        quantity_stock: 0,
+        article_reference: '',
     });
 
     const [errors, setErrors] = React.useState<FormErrors>({});
@@ -101,7 +60,7 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
             document.body.style.backgroundColor = telegram.themeParams?.bg_color || '#ffffff';
             document.body.style.color = telegram.themeParams?.text_color || '#000000';
 
-            telegram.MainButton.setText('✅ Créer le client');
+            telegram.MainButton.setText('✅ Créer un article');
             telegram.MainButton.color = telegram.themeParams?.button_color || '#3390ec';
             telegram.MainButton.textColor = telegram.themeParams?.button_text_color || '#ffffff';
             telegram.MainButton.show();
@@ -142,16 +101,8 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
 
     const validateFormData = (data: FormData): FormErrors => {
         const newErrors: FormErrors = {};
-        if (!data.client_name.trim()) {
-            newErrors.client_name = 'Le nom du client est requis.';
-        }
-        if (!data.client_email.trim()) {
-            newErrors.client_email = "L'email du client est requis.";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.client_email)) {
-            newErrors.client_email = "L'email du client n'est pas valide.";
-        }
-        if (!data.client_phone?.trim()) {
-            newErrors.client_phone = 'Le téléphone du client est requis.';
+        if (!data.article_name.trim()) {
+            newErrors.article_name = "Le nom de l'article est requis.";
         }
         return newErrors;
     };
@@ -179,7 +130,7 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
 
             if (telegramApp) {
                 const userId = telegramApp.initDataUnsafe?.user?.id || telegram_id;
-                const endpoint = `/api/telegram/client/create/${userId}`;
+                const endpoint = `/api/telegram/article/create/${userId}`;
 
                 fetch(endpoint, {
                     method: 'POST',
@@ -191,7 +142,7 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
                     .then((response) => response.json())
                     .then((data) => {
                         if (data.success) {
-                            telegramApp.showAlert('✅ client créée avec succès!');
+                            telegramApp.showAlert('✅ Article créée avec succès!');
                             setTimeout(() => {
                                 telegramApp.close();
                             }, 1000);
@@ -228,7 +179,7 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
                         telegramApp.close();
                     });
             } else {
-                alert('✅ client créée! (Mode test)\n\nDonnées: ' + dataToSend);
+                alert('✅ Article créée! (Mode test)\n\nDonnées: ' + dataToSend);
                 setIsLoading(false);
             }
         } catch (error) {
@@ -245,7 +196,7 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
 
     return (
         <>
-            <Head title="Créer un client" />
+            <Head title="Créer un article" />
 
             <div
                 className="min-h-screen p-4"
@@ -256,24 +207,24 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
             >
                 <div className="mx-auto max-w-2xl">
                     <div className="mb-6 text-center">
-                        <h1 className="mb-2 text-3xl font-bold">🏢 Créer un client</h1>
-                        <p className="opacity-70">Remplissez les informations de votre client</p>
+                        <h1 className="mb-2 text-3xl font-bold">🏢 Créer un article</h1>
+                        <p className="opacity-70">Remplissez les informations de votre article</p>
                     </div>
 
                     <div className="space-y-5">
                         <div>
-                            <label htmlFor="client_name" className="mb-2 block text-sm font-semibold">
-                                Nom du client <span className="text-red-500">*</span>
+                            <label htmlFor="article_name" className="mb-2 block text-sm font-semibold">
+                                Nom de l'article <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
-                                id="client_name"
-                                name="client_name"
-                                value={formData.client_name}
+                                id="article_name"
+                                name="article_name"
+                                value={formData.article_name}
                                 onChange={handleChange}
                                 placeholder="Ex: TechSolutions Madagascar"
                                 className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
-                                    errors.client_name ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
+                                    errors.article_name ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
                                 }`}
                                 style={{
                                     backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
@@ -281,109 +232,147 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
                                 }}
                                 disabled={isLoading}
                             />
-                            {errors.client_name && (
+                            {errors.article_name && (
                                 <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
-                                    <span>⚠️</span> {errors.client_name}
+                                    <span>⚠️</span> {errors.article_name}
                                 </p>
                             )}
                         </div>
 
                         <div>
-                            <label htmlFor="client_email" className="mb-2 block text-sm font-semibold">
-                                Email du client <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="email"
-                                id="client_email"
-                                name="client_email"
-                                value={formData.client_email}
-                                onChange={handleChange}
-                                placeholder="Ex: 4Hs9O@example.com"
-                                className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 transition-all focus:border-blue-500"
-                                style={{
-                                    backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
-                                    color: tg?.themeParams?.text_color || '#000000',
-                                }}
-                                disabled={isLoading}
-                            />
-                            {errors.client_email && (
-                                <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
-                                    <span>⚠️</span> {errors.client_email}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label htmlFor="client_phone" className="mb-2 block text-sm font-semibold">
-                                Téléphone du client <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="tel"
-                                id="client_phone"
-                                name="client_phone"
-                                value={formData.client_phone}
-                                onChange={handleChange}
-                                placeholder="Ex: +261 34 12 345 67"
-                                className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 transition-all focus:border-blue-500"
-                                style={{
-                                    backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
-                                    color: tg?.themeParams?.text_color || '#000000',
-                                }}
-                                disabled={isLoading}
-                            />
-                            {errors.client_phone && (
-                                <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
-                                    <span>⚠️</span> {errors.client_phone}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label htmlFor="client_cin" className="mb-2 block text-sm font-semibold">
-                                CIN du client
+                            <label htmlFor="article_reference" className="mb-2 block text-sm font-semibold">
+                                Référence de l'article
                             </label>
                             <input
                                 type="text"
-                                id="client_cin"
-                                name="client_cin"
-                                value={formData.client_cin}
+                                id="article_reference"
+                                name="article_reference"
+                                value={formData.article_reference}
                                 onChange={handleChange}
-                                placeholder="Ex: 1 23 456 789"
-                                className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 transition-all focus:border-blue-500"
+                                placeholder="Ex: TechSolutions Madagascar"
+                                className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
+                                    errors.article_reference ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
+                                }`}
                                 style={{
                                     backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
                                     color: tg?.themeParams?.text_color || '#000000',
                                 }}
                                 disabled={isLoading}
                             />
-                            {errors.client_cin && (
+                            {errors.article_reference && (
                                 <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
-                                    <span>⚠️</span> {errors.client_cin}
+                                    <span>⚠️</span> {errors.article_reference}
                                 </p>
                             )}
                         </div>
 
                         <div>
-                            <label htmlFor="client_adress" className="mb-2 block text-sm font-semibold">
-                                Adresse du client
+                            <label htmlFor="selling_price" className="mb-2 block text-sm font-semibold">
+                                Prix unitaire de l'article <span className="text-red-500">*</span>
+                            </label>
+                            <div className="flex items-center justify-between">
+                                <input
+                                    type="text"
+                                    id="selling_price"
+                                    name="selling_price"
+                                    value={formData.selling_price}
+                                    onChange={handleChange}
+                                    placeholder="Ex: 12000"
+                                    className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
+                                        errors.selling_price ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
+                                    }`}
+                                    style={{
+                                        backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
+                                        color: tg?.themeParams?.text_color || '#000000',
+                                    }}
+                                    disabled={isLoading}
+                                />
+                                <span>FCFA</span>
+                            </div>
+                            {errors.selling_price && (
+                                <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
+                                    <span>⚠️</span> {errors.selling_price}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="article_unité" className="mb-2 block text-sm font-semibold">
+                                Unité de l'article <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
-                                id="client_adress"
-                                name="client_adress"
-                                value={formData.client_adress}
+                                id="article_unité"
+                                name="article_unité"
+                                value={formData.article_unité}
                                 onChange={handleChange}
-                                placeholder="Ex: 123 Rue de l'Innovation, Antananarivo"
-                                className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 transition-all focus:border-blue-500"
+                                placeholder="Ex: TechSolutions Madagascar"
+                                className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
+                                    errors.article_unité ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
+                                }`}
                                 style={{
                                     backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
                                     color: tg?.themeParams?.text_color || '#000000',
                                 }}
                                 disabled={isLoading}
                             />
-                            {errors.client_adress && (
+                            {errors.article_unité && (
                                 <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
-                                    <span>⚠️</span> {errors.client_adress}
+                                    <span>⚠️</span> {errors.article_unité}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="article_tva" className="mb-2 block text-sm font-semibold">
+                                TVA de l'article
+                            </label>
+                            <input
+                                type="number"
+                                id="article_tva"
+                                name="article_tva"
+                                value={formData.article_tva}
+                                onChange={handleChange}
+                                placeholder="Ex: TechSolutions Madagascar"
+                                className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
+                                    errors.article_tva ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
+                                }`}
+                                style={{
+                                    backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
+                                    color: tg?.themeParams?.text_color || '#000000',
+                                }}
+                                disabled={isLoading}
+                            />
+                            {errors.article_tva && (
+                                <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
+                                    <span>⚠️</span> {errors.article_tva}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="quantity_stock" className="mb-2 block text-sm font-semibold">
+                                Quantité en stock
+                            </label>
+                            <input
+                                type="number"
+                                id="quantity_stock"
+                                name="quantity_stock"
+                                value={formData.quantity_stock}
+                                onChange={handleChange}
+                                placeholder="Ex: TechSolutions Madagascar"
+                                className={`w-full rounded-xl border-2 px-4 py-3 transition-all ${
+                                    errors.quantity_stock ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
+                                }`}
+                                style={{
+                                    backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
+                                    color: tg?.themeParams?.text_color || '#000000',
+                                }}
+                                disabled={isLoading}
+                            />
+                            {errors.quantity_stock && (
+                                <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
+                                    <span>⚠️</span> {errors.quantity_stock}
                                 </p>
                             )}
                         </div>
@@ -394,8 +383,8 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
                             <span className="text-lg">ℹ️</span>
                             <span>
                                 {showFallbackButton
-                                    ? 'Cliquez sur le bouton ci-dessus pour créer votre client'
-                                    : "Cliquez sur le bouton en bas de l'écran pour créer votre client"}
+                                    ? 'Cliquez sur le bouton ci-dessus pour créer votre article'
+                                    : "Cliquez sur le bouton en bas de l'écran pour créer votre article"}
                             </span>
                         </p>
                     </div>

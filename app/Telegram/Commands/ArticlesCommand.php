@@ -9,6 +9,7 @@ use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use App\Models\User;
 use App\Models\Article;
 use App\Models\MvtArticle;
+use SergiX44\Nutgram\Telegram\Types\WebApp\WebAppInfo;
 
 /**
  * Commande principale pour gérer les articles
@@ -39,9 +40,13 @@ class ArticlesCommand extends Command
             . "📦 Stock total : <b>{$totalStock} unités</b>\n\n"
             . "Que souhaitez-vous faire ?";
 
+
+        $telegramUser = $bot->user();
+        $webAppUrl = route('webapp.form.article', ['user_id' => $telegramUser->id]);
+
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
-                InlineKeyboardButton::make('➕ Ajouter un article', callback_data: 'article_add'),
+                InlineKeyboardButton::make('➕ Ajouter un article', web_app: new WebAppInfo($webAppUrl)),
                 InlineKeyboardButton::make('📋 Voir mes articles', callback_data: 'article_list')
             )
             ->addRow(
@@ -1064,9 +1069,13 @@ class ArticleCallbackHandler
             . "📦 Stock total : <b>{$totalStock} unités</b>\n\n"
             . "Que souhaitez-vous faire ?";
 
+
+        $telegramUser = $bot->user();
+        $webAppUrl = route('webapp.form.article', ['user_id' => $telegramUser->id]);
+
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
-                InlineKeyboardButton::make('➕ Ajouter un article', callback_data: 'article_add'),
+                InlineKeyboardButton::make('➕ Ajouter un article', web_app: new WebAppInfo($webAppUrl)),
                 InlineKeyboardButton::make('📋 Voir mes articles', callback_data: 'article_list')
             )
             ->addRow(

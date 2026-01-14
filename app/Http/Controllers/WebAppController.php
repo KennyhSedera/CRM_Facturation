@@ -21,4 +21,11 @@ class WebAppController extends Controller
             'telegram_id' => $request->get('user_id'),
         ]);
     }
+
+    public function form_article(Request $request)
+    {
+        return Inertia::render('Telegram/ArticleFormTelegram', [
+            'telegram_id' => $request->get('user_id'),
+        ]);
+    }
 }

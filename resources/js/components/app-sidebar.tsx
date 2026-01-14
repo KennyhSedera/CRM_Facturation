@@ -23,7 +23,7 @@ const mainNavItems: NavItem[] = [
         title: 'Clients',
         href: '/clients',
         icon: Users,
-        roles: ['user', 'admin_company'],
+        // roles: ['user', 'admin_company'],
     },
     // {s
     //     title: 'Catalogues',
@@ -39,7 +39,7 @@ const mainNavItems: NavItem[] = [
         title: 'Entrées / Sorties',
         href: '/mouvements',
         icon: ShoppingCart,
-        roles: ['super_admin', 'admin_company'],
+        roles: ['user', 'admin_company'],
     },
     {
         title: 'Reçus / Factures',
