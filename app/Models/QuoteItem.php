@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Quote;
 use App\Models\Article;
 
+/**
+ * @property-read Article|null $article
+ * @property-read Quote|null $quote
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuoteItem newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuoteItem newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|QuoteItem query()
+ * @mixin \Eloquent
+ */
 class QuoteItem extends Model
 {
     protected $table = 'quotes_items';

@@ -6,6 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property-read string $time_ago
+ * @property-read string $type_emoji
+ * @property-read string $type_label
+ * @property-read \App\Models\Ticket|null $ticket
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketMessage newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketMessage newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TicketMessage query()
+ * @mixin \Eloquent
+ */
 class TicketMessage extends Model
 {
     use HasFactory;

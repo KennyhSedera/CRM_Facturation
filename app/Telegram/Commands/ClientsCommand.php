@@ -261,7 +261,7 @@ class ClientCallbackHandler
 
         try {
             $client = Client::createClient($clientData, $user->id, $user->company_id);
-            Company::where('company_id', $user->company_id)
+            Company::where(column: 'company_id', value: $user->company_id)
                 ->update(['client_count' => ($clientCount + 1)]);
 
             $message = "✅ <b>Client créé avec succès !</b>\n\n"
@@ -364,15 +364,19 @@ class ClientCallbackHandler
             return;
 
         $user = User::where('telegram_id', $bot->user()->id)->with('company')->first();
-        $clientCount = Client::where('company_id', $user->company_id)->count();
+        $clientCount = Client::where('company_id', '=', $user->company_id, true)->count();
 
         $message = "👥 <b>Gestion des Clients</b>\n\n"
             . "📊 Vous avez <b>{$clientCount} client(s)</b>\n\n"
             . "Que souhaitez-vous faire ?";
 
+
+        $telegramUser = $bot->user();
+        $webAppUrl = route('webapp.form.client', ['user_id' => $telegramUser->id]);
+
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
-                InlineKeyboardButton::make('➕ Ajouter un client', callback_data: 'client_add'),
+                InlineKeyboardButton::make('➕ Ajouter un client', web_app: new WebAppInfo($webAppUrl)),
                 InlineKeyboardButton::make('📋 Voir mes clients', callback_data: 'client_list')
             )
             ->addRow(

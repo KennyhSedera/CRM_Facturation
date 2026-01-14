@@ -62,21 +62,6 @@ $bot->onCommand('createcompany', function (Nutgram $bot) {
     );
 });
 
-$bot->onCommand('createclient', function (Nutgram $bot) {
-    $user = User::checkTelegramAccess($bot, requireCompany: true);
-    if (!$user)
-        return;
-
-    $keyboard = (new WebAppKeyboard())->buttonCreateClient($bot);
-
-    $bot->sendMessage(
-        text: "🏢 <b>Ajouter un client</b>\n\n" .
-        "Cliquez sur le bouton ci-dessous pour remplir le formulaire 👇",
-        parse_mode: ParseMode::HTML,
-        reply_markup: $keyboard
-    );
-});
-
 $bot->onCommand('quotes', [AlertCallback::class, 'handle']);
 $bot->onCommand('calculate', [AlertCallback::class, 'handle']);
 $bot->onCommand('settings', [AlertCallback::class, 'handle']);

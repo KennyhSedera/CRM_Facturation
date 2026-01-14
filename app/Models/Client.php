@@ -6,6 +6,50 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
+/**
+ * @property int $client_id
+ * @property string $client_email
+ * @property string $client_name
+ * @property string|null $client_adress
+ * @property string|null $client_cin
+ * @property int $user_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $client_phone
+ * @property string|null $client_city
+ * @property string|null $client_country
+ * @property string $client_status
+ * @property string|null $client_note
+ * @property string|null $client_reference
+ * @property int|null $company_id
+ * @property-read \App\Models\Company|null $company
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
+ * @property-read int|null $invoices_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Quote> $quotes
+ * @property-read int|null $quotes_count
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client active()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client inactive()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereClientAdress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereClientCin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereClientCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereClientCountry($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereClientEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereClientName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereClientNote($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereClientPhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereClientReference($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereClientStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereCompanyId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereUserId($value)
+ * @mixin \Eloquent
+ */
 class Client extends Model
 {
     protected $table = 'clients';

@@ -6,6 +6,52 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
+/**
+ * @property int $payment_id
+ * @property int $company_id
+ * @property int $user_id
+ * @property string $payment_reference
+ * @property string $payment_method
+ * @property string $plan_type
+ * @property string $action_type
+ * @property float $amount
+ * @property string $currency
+ * @property string|null $transaction_id
+ * @property string|null $transaction_proof
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $confirmed_at
+ * @property int|null $confirmed_by
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Company $company
+ * @property-read \App\Models\User|null $confirmedBy
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment confirmed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment pending()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment rejected()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment whereActionType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment whereAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment whereCompanyId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment whereConfirmedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment whereConfirmedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment whereCurrency($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment wherePaymentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment wherePaymentMethod($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment wherePaymentReference($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment wherePlanType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment whereTransactionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment whereTransactionProof($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payment whereUserId($value)
+ * @mixin \Eloquent
+ */
 class Payment extends Model
 {
     protected $table = 'payments';

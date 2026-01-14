@@ -8,6 +8,33 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * @property-read \App\Models\User|null $agent
+ * @property-read string $age
+ * @property-read string $priority_emoji
+ * @property-read string $priority_label
+ * @property-read string|null $resolution_time
+ * @property-read string $status_emoji
+ * @property-read string $status_label
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TicketMessage> $messages
+ * @property-read int|null $messages_count
+ * @property-read \App\Models\User|null $user
+ * @method static Builder<static>|Ticket assignedTo(int $agentId)
+ * @method static Builder<static>|Ticket byCategory(string $category)
+ * @method static Builder<static>|Ticket byPriority(string $priority)
+ * @method static Builder<static>|Ticket closed()
+ * @method static Builder<static>|Ticket forUser(int $telegramId)
+ * @method static Builder<static>|Ticket inProgress()
+ * @method static Builder<static>|Ticket newModelQuery()
+ * @method static Builder<static>|Ticket newQuery()
+ * @method static Builder<static>|Ticket old()
+ * @method static Builder<static>|Ticket open()
+ * @method static Builder<static>|Ticket query()
+ * @method static Builder<static>|Ticket recent()
+ * @method static Builder<static>|Ticket unassigned()
+ * @method static Builder<static>|Ticket urgent()
+ * @mixin \Eloquent
+ */
 class Ticket extends Model
 {
     use HasFactory;
