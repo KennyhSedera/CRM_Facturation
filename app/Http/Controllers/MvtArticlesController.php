@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\MvtArticle;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class MvtArticlesController extends Controller
@@ -12,7 +13,11 @@ class MvtArticlesController extends Controller
     // 1️⃣ Liste tous les mouvements
     public function index()
     {
-        $mouvements = MvtArticle::with(['user', 'article'])->get();
+        $user = Auth::user();
+
+        $mouvements = MvtArticle::whereHas('article', function ($query) use ($user) {
+            $query->where('company_id', $user->company_id);
+        })->with(['user', 'article'])->get();
 
         return response()->json([
             'success' => true,

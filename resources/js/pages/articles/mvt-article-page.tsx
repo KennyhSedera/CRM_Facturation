@@ -54,7 +54,7 @@ const mvtArticlePage = () => {
     const [filteredMouvements, setFilteredMouvements] = useState<Mouvement[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>('');
-    const [filterType, setFilterType] = useState<'all' | 'entree' | 'sortie'>('all');
+    const [filterType, setFilterType] = useState<string>('all');
     const [currentPage, setCurrentPage] = useState<number>(1);
     const itemsPerPage = 5;
 
@@ -75,6 +75,42 @@ const mvtArticlePage = () => {
 
         fetchData();
     }, []);
+
+    const statsCards = [
+        {
+            label: 'Tous',
+            value: mouvements.length,
+            filterType: 'all',
+            icon: Package,
+            colorClasses: {
+                text: 'text-slate-800 dark:text-slate-100',
+                bg: 'bg-blue-100 dark:bg-blue-900/30',
+                icon: 'text-blue-600 dark:text-blue-400',
+            },
+        },
+        {
+            label: 'Entrées',
+            value: mouvements.filter((m) => m.mvtType === 'entree').length,
+            filterType: 'entree',
+            icon: ArrowUpCircle,
+            colorClasses: {
+                text: 'text-green-600 dark:text-green-400',
+                bg: 'bg-green-100 dark:bg-green-900/30',
+                icon: 'text-green-600 dark:text-green-400',
+            },
+        },
+        {
+            label: 'Sorties',
+            value: mouvements.filter((m) => m.mvtType === 'sortie').length,
+            filterType: 'sortie',
+            icon: ArrowDownCircle,
+            colorClasses: {
+                text: 'text-red-600 dark:text-red-400',
+                bg: 'bg-red-100 dark:bg-red-900/30',
+                icon: 'text-red-600 dark:text-red-400',
+            },
+        },
+    ];
 
     useEffect(() => {
         let filtered = mouvements;
@@ -140,46 +176,28 @@ const mvtArticlePage = () => {
                                 <h1 className="mb-2 text-3xl font-bold text-slate-800 dark:text-slate-100">📦 Mouvement Articles</h1>
                                 <p className="text-slate-600 dark:text-slate-400">Gestion des entrées et sorties de stock</p>
                             </div>
+
                             <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-                                <div className="rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm dark:border-gray-500/50 dark:bg-black">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="mb-1 text-sm text-slate-600 dark:text-slate-400">Total</p>
-                                            <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">{mouvements.length}</p>
+                                {statsCards.map((card) => {
+                                    const Icon = card.icon;
+                                    return (
+                                        <div
+                                            key={card.filterType}
+                                            className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm dark:border-gray-500/50 dark:bg-black"
+                                            onClick={() => setFilterType(card.filterType)}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="mb-1 text-sm text-slate-600 dark:text-slate-400">{card.label}</p>
+                                                    <p className={`text-3xl font-bold ${card.colorClasses.text}`}>{card.value}</p>
+                                                </div>
+                                                <div className={`rounded-lg p-3 ${card.colorClasses.bg}`}>
+                                                    <Icon className={`h-8 w-8 ${card.colorClasses.icon}`} />
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/30">
-                                            <Package className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm dark:border-gray-500/50 dark:bg-black">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="mb-1 text-sm text-slate-600 dark:text-slate-400">Entrées</p>
-                                            <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                                                {mouvements.filter((m) => m.mvtType === 'entree').length}
-                                            </p>
-                                        </div>
-                                        <div className="rounded-lg bg-green-100 p-3 dark:bg-green-900/30">
-                                            <ArrowUpCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm dark:border-gray-500/50 dark:bg-black">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="mb-1 text-sm text-slate-600 dark:text-slate-400">Sorties</p>
-                                            <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                                                {mouvements.filter((m) => m.mvtType === 'sortie').length}
-                                            </p>
-                                        </div>
-                                        <div className="rounded-lg bg-red-100 p-3 dark:bg-red-900/30">
-                                            <ArrowDownCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
-                                        </div>
-                                    </div>
-                                </div>
+                                    );
+                                })}
                             </div>
                         </div>
 
@@ -199,39 +217,6 @@ const mvtArticlePage = () => {
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-gray-500/50 dark:bg-black">
-                                        <button
-                                            onClick={() => setFilterType('all')}
-                                            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                                                filterType === 'all'
-                                                    ? 'bg-white text-slate-800 shadow-sm dark:bg-slate-700 dark:text-slate-100'
-                                                    : 'text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-                                            }`}
-                                        >
-                                            Tous
-                                        </button>
-                                        <button
-                                            onClick={() => setFilterType('entree')}
-                                            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                                                filterType === 'entree'
-                                                    ? 'bg-white text-green-700 shadow-sm dark:bg-slate-700 dark:text-green-400'
-                                                    : 'text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-                                            }`}
-                                        >
-                                            Entrées
-                                        </button>
-                                        <button
-                                            onClick={() => setFilterType('sortie')}
-                                            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                                                filterType === 'sortie'
-                                                    ? 'bg-white text-red-700 shadow-sm dark:bg-slate-700 dark:text-red-400'
-                                                    : 'text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-                                            }`}
-                                        >
-                                            Sorties
-                                        </button>
-                                    </div>
-
                                     <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">
                                         <Plus className="h-4 w-4" />
                                         Nouveau

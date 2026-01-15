@@ -1,8 +1,7 @@
 import Head from '@/components/head';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, PageProps } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { ApiWrapper, Client, PaginationData } from '@/types/client';
-import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { ChevronLeft, ChevronRight, Edit, Eye, Filter, Mail, MapPin, Phone, Plus, Search, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
@@ -18,7 +17,6 @@ const ClientPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [clients, setClients] = useState<Client[]>([]);
-    const { auth } = usePage<PageProps>().props;
     const [pagination, setPagination] = useState<PaginationData>({
         current_page: 1,
         last_page: 1,
@@ -33,7 +31,7 @@ const ClientPage: React.FC = () => {
         const fetchClients = async () => {
             setLoading(true);
             try {
-                const response = await axios.get('/api/clients/company/' + auth.user.company_id);
+                const response = await axios.get('/api/clients');
                 const result: ApiWrapper = response.data;
 
                 if (result.success && result.data) {

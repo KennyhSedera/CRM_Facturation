@@ -1,8 +1,8 @@
 import Head from '@/components/head';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, PageProps } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Article } from '@/types/article';
-import { usePage } from '@inertiajs/react';
+import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FiEdit, FiTrash2 } from 'react-icons/fi';
 import { IoSearchOutline } from 'react-icons/io5';
@@ -16,11 +16,9 @@ const ArticlePage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    const { auth } = usePage<PageProps>().props;
-
     const fetchArticles = async () => {
         try {
-            const res = await fetch('/api/articles/company/' + auth?.user?.company_id);
+            const res = await fetch('/api/articles');
             const { data } = await res.json();
             setArticles(data);
         } catch (e) {
@@ -96,12 +94,10 @@ const ArticlePage = () => {
 
     const handleEdit = (articleId: number) => {
         console.log('Edit article:', articleId);
-        // Ajoutez votre logique d'édition ici
     };
 
     const handleDelete = (articleId: number) => {
         console.log('Delete article:', articleId);
-        // Ajoutez votre logique de suppression ici
     };
 
     return (
@@ -109,15 +105,15 @@ const ArticlePage = () => {
             <Head title="Articles" />
 
             <div className="space-y-6">
-                {/* Header Section */}
                 <div className="rounded-xl bg-gray-50 p-6 shadow-sm dark:bg-white/15">
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">📦 Gestion des articles</h1>
                             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Gérez votre inventaire d'articles et produits</p>
                         </div>
-                        <button className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white shadow-md transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none">
-                            + Nouvel article
+                        <button className="flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700">
+                            <Plus className="h-4 w-4" />
+                            Nouvel article
                         </button>
                     </div>
                     <div className="pt-6">
@@ -184,7 +180,6 @@ const ArticlePage = () => {
                     </div>
                 </div>
 
-                {/* Content Section */}
                 <div className="overflow-hidden rounded-xl bg-gray-50 shadow-sm dark:bg-white/15">
                     {loading && (
                         <div className="flex items-center justify-center py-16">

@@ -10,9 +10,10 @@ use Illuminate\Support\Facades\Validator;
 class ArticleController extends Controller
 {
     // 1️⃣ Liste tous les articles
-    public function index($id)
+    public function index()
     {
-        $articles = Article::where('company_id', $id)->with('user', 'company')->get();
+        $user = Auth::user();
+        $articles = Article::where('company_id', $user->company_id)->with('user', 'company')->get();
 
         return response()->json([
             'success' => true,

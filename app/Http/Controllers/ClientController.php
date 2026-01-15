@@ -15,7 +15,7 @@ class ClientController extends Controller
     public function index(Request $request)
     {
         try {
-            $user = $request->user();
+            $user = Auth::user();
 
             $perPage = $request->get('per_page', 5);
             $search = $request->get('search');
@@ -112,7 +112,7 @@ class ClientController extends Controller
         try {
             $validated = $validator->validated();
 
-            $user = $request->user();
+            $user = Auth::user();
 
             // Add user_id and company_id
             $validated['user_id'] = $user->id;
@@ -147,7 +147,7 @@ class ClientController extends Controller
     {
         try {
 
-            $user = $request->user();
+            $user = Auth::user();
             $client = Client::where('user_id', $user->id)
                 ->with(['quotes', 'invoices', 'user', 'company'])
                 ->findOrFail($id);
@@ -178,7 +178,7 @@ class ClientController extends Controller
     {
         try {
 
-            $user = $request->user();
+            $user = Auth::user();
             $client = Client::where('user_id', $user->id)->findOrFail($id);
 
             $validator = Validator::make($request->all(), [
@@ -231,7 +231,7 @@ class ClientController extends Controller
     {
         try {
 
-            $user = $request->user();
+            $user = Auth::user();
             $client = Client::where('user_id', $user->id)->findOrFail($id);
 
             // Check if client has related quotes or invoices
@@ -273,7 +273,7 @@ class ClientController extends Controller
     {
         try {
 
-            $user = $request->user();
+            $user = Auth::user();
             $client = Client::where('user_id', $user->id)->findOrFail($id);
 
             $client->client_status = $client->client_status === 'active' ? 'inactive' : 'active';
@@ -308,7 +308,7 @@ class ClientController extends Controller
     {
         try {
 
-            $user = $request->user();
+            $user = Auth::user();
             $client = Client::where('user_id', $user->id)->findOrFail($id);
 
             $stats = [
