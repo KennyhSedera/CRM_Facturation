@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MvtArticlesController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\QuoteController;
@@ -43,6 +44,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // routes quote item
     Route::apiResource('quote_items', QuoteItemController::class);
+
+    // routes dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 });
 
 Route::get('/pdf', [PdfController::class, 'generate']);

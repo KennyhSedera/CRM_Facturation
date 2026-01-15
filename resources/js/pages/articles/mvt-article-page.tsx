@@ -139,6 +139,8 @@ const mvtArticlePage = () => {
             day: '2-digit',
             month: 'long',
             year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
         });
     };
 
@@ -289,7 +291,7 @@ const mvtArticlePage = () => {
                                             <div className="ml-4 flex-shrink-0 text-right">
                                                 <div className="flex items-center justify-end text-sm text-slate-500 dark:text-slate-400">
                                                     <Calendar className="mr-1 h-4 w-4" />
-                                                    {formatDate(mvt.mvt_date)}
+                                                    {formatDate(mvt.created_at)}
                                                 </div>
 
                                                 {mvt.user && (

@@ -638,9 +638,6 @@ class ArticleCallbackHandler
                 InlineKeyboardButton::make('➖ Retirer', callback_data: "stock_remove_{$articleId}")
             )
             ->addRow(
-                InlineKeyboardButton::make('🔄 Remplacer', callback_data: "stock_replace_{$articleId}")
-            )
-            ->addRow(
                 InlineKeyboardButton::make('🔙 Retour', callback_data: "article_view_{$articleId}")
             );
 
