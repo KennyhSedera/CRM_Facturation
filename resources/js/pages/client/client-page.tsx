@@ -229,99 +229,107 @@ const ClientPage: React.FC = () => {
                     </div>
                 )}
 
-                <div className="overflow-x-auto">
-                    {filteredClients.length > 0 && (
-                        <table className="w-full">
-                            <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-white/10">
-                                <tr>
-                                    <th className="px-10 py-3 text-left text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
-                                        Client
-                                    </th>
-                                    <th className="px-10 py-3 text-left text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
-                                        Contact
-                                    </th>
-                                    <th className="px-10 py-3 text-left text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
-                                        Localisation
-                                    </th>
-                                    <th className="px-10 py-3 text-left text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
-                                        Statut
-                                    </th>
-                                    <th className="px-10 py-3 text-right text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-gray-950">
-                                {filteredClients.map((client) => (
-                                    <tr key={client.client_id} className="transition-colors hover:bg-white dark:hover:bg-black">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center">
-                                                <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-600">
-                                                    {client.client_name
-                                                        .split(' ')
-                                                        .map((n) => n[0])
-                                                        .join('')
-                                                        .toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <div className="font-medium text-gray-900 dark:text-gray-200">{client.client_name}</div>
-                                                    <div className="text-sm text-gray-500 dark:text-gray-300">{client.client_reference}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="space-y-1">
-                                                <div className="flex items-center text-sm text-gray-600 dark:text-gray-200">
-                                                    <Mail className="mr-2 h-4 w-4 text-gray-400" />
-                                                    {client.client_email}
-                                                </div>
-                                                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                                                    <Phone className="mr-2 h-4 w-4 text-gray-400" />
-                                                    {client.client_phone}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-start text-sm text-gray-600 dark:text-gray-200">
-                                                <MapPin className="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 text-gray-400" />
-                                                <div>
-                                                    <div>{client.client_adress}</div>
-                                                    {client.client_city && (
-                                                        <div className="text-gray-500 dark:text-gray-300">{client.client_city}, </div>
-                                                    )}
-                                                    <div className="text-gray-500 dark:text-gray-300">{client.client_country}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${getStatusBadge(client.client_status)}`}
-                                            >
-                                                {getStatusLabel(client.client_status)}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button
-                                                    className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/20"
-                                                    title="Voir"
-                                                >
-                                                    <Eye className="h-4 w-4" />
-                                                </button>
-                                                <button className="rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50" title="Modifier">
-                                                    <Edit className="h-4 w-4" />
-                                                </button>
-                                                <button className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50" title="Supprimer">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-                                            </div>
-                                        </td>
+                {!loading && filteredClients.length > 0 && (
+                    <div className="overflow-x-auto">
+                        {filteredClients.length > 0 && (
+                            <table className="w-full">
+                                <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-white/10">
+                                    <tr>
+                                        <th className="px-10 py-3 text-left text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
+                                            Client
+                                        </th>
+                                        <th className="px-10 py-3 text-left text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
+                                            Contact
+                                        </th>
+                                        <th className="px-10 py-3 text-left text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
+                                            Localisation
+                                        </th>
+                                        <th className="px-10 py-3 text-left text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
+                                            Statut
+                                        </th>
+                                        <th className="px-10 py-3 text-right text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
+                                            Actions
+                                        </th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200 dark:divide-gray-950">
+                                    {filteredClients.map((client) => (
+                                        <tr key={client.client_id} className="transition-colors hover:bg-white dark:hover:bg-black">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center">
+                                                    <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-600">
+                                                        {client.client_name
+                                                            .split(' ')
+                                                            .map((n) => n[0])
+                                                            .join('')
+                                                            .toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-medium text-gray-900 dark:text-gray-200">{client.client_name}</div>
+                                                        <div className="text-sm text-gray-500 dark:text-gray-300">{client.client_reference}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="space-y-1">
+                                                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-200">
+                                                        <Mail className="mr-2 h-4 w-4 text-gray-400" />
+                                                        {client.client_email}
+                                                    </div>
+                                                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                                                        <Phone className="mr-2 h-4 w-4 text-gray-400" />
+                                                        {client.client_phone}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-start text-sm text-gray-600 dark:text-gray-200">
+                                                    <MapPin className="mt-0.5 mr-2 h-4 w-4 flex-shrink-0 text-gray-400" />
+                                                    <div>
+                                                        <div>{client.client_adress}</div>
+                                                        {client.client_city && (
+                                                            <div className="text-gray-500 dark:text-gray-300">{client.client_city}, </div>
+                                                        )}
+                                                        <div className="text-gray-500 dark:text-gray-300">{client.client_country}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span
+                                                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${getStatusBadge(client.client_status)}`}
+                                                >
+                                                    {getStatusLabel(client.client_status)}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/20"
+                                                        title="Voir"
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        className="rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50"
+                                                        title="Modifier"
+                                                    >
+                                                        <Edit className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50"
+                                                        title="Supprimer"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                )}
 
                 {/* Pagination */}
                 {filteredClients.length > 0 && (

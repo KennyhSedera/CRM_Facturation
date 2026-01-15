@@ -362,9 +362,9 @@ class TelegramController extends Controller
                 'article_id' => $article->article_id,
                 'user_id' => $userId,
             ];
-
-            MvtArticle::create($entree);
-
+            if ($validated['quantity_stock'] > 0) {
+                MvtArticle::create($entree);
+            }
             DB::commit();
 
             $message = "✅ <b>Article créé avec succès !</b>\n\n" .

@@ -226,7 +226,7 @@ const mvtArticlePage = () => {
                         </div>
                     </div>
 
-                    {filteredMouvements.length > 0 && (
+                    {!loading && filteredMouvements.length > 0 && (
                         <div className="overflow-hidden rounded-xl border border-slate-200 bg-gray-50 shadow-sm dark:border-gray-500/50 dark:bg-white/10">
                             <div className="border-b border-slate-200 p-4 dark:border-gray-500/50">
                                 <div className="flex items-center justify-between">
