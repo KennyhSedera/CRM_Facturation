@@ -332,7 +332,7 @@ const ClientPage: React.FC = () => {
                 )}
 
                 {/* Pagination */}
-                {filteredClients.length > 0 && (
+                {!loading && filteredClients.length > 0 && (
                     <div className="flex flex-col items-center justify-between gap-4 border-t border-gray-200 px-6 py-4 sm:flex-row dark:border-gray-700">
                         <div className="text-sm text-gray-600 dark:text-gray-300">
                             Affichage de <span className="font-medium">{pagination.from}</span> à <span className="font-medium">{pagination.to}</span>{' '}

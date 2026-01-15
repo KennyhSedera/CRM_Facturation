@@ -320,31 +320,26 @@ const ArticlePage = () => {
                         </div>
                     )}
 
-                    {/* Pagination */}
                     {!loading && filteredArticles.length > 0 && (
                         <div className="border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-black/20">
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                {/* Results info */}
                                 <div className="text-sm text-gray-700 dark:text-gray-300">
                                     Affichage de <span className="font-semibold">{startIndex + 1}</span> à{' '}
                                     <span className="font-semibold">{Math.min(endIndex, filteredArticles.length)}</span> sur{' '}
                                     <span className="font-semibold">{filteredArticles.length}</span> résultats
                                 </div>
 
-                                {/* Pagination controls */}
                                 <div className="flex items-center gap-2">
-                                    {/* Previous button */}
                                     <button
                                         onClick={() => goToPage(currentPage - 1)}
                                         disabled={currentPage === 1}
-                                        className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                        className="cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                                     >
                                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                         </svg>
                                     </button>
 
-                                    {/* Page numbers */}
                                     <div className="flex items-center gap-1">
                                         {getPageNumbers().map((page, index) =>
                                             page === '...' ? (
@@ -358,7 +353,7 @@ const ArticlePage = () => {
                                                     className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
                                                         currentPage === page
                                                             ? 'bg-blue-600 text-white dark:bg-blue-500'
-                                                            : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                                                            : 'cursor-pointer border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                                                     }`}
                                                 >
                                                     {page}
@@ -367,11 +362,10 @@ const ArticlePage = () => {
                                         )}
                                     </div>
 
-                                    {/* Next button */}
                                     <button
                                         onClick={() => goToPage(currentPage + 1)}
                                         disabled={currentPage === totalPages}
-                                        className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                        className="cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                                     >
                                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

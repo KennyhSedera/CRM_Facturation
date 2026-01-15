@@ -320,7 +320,7 @@ const mvtArticlePage = () => {
                                             <button
                                                 onClick={goToPrevPage}
                                                 disabled={currentPage === 1}
-                                                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-500/50 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                                className="flex cursor-pointer items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-500/50 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                                             >
                                                 <ChevronLeft className="h-4 w-4" />
                                                 Précédent
@@ -331,7 +331,7 @@ const mvtArticlePage = () => {
                                             <button
                                                 onClick={goToNextPage}
                                                 disabled={currentPage === totalPages}
-                                                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-500/50 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                                className="flex cursor-pointer items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-500/50 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                                             >
                                                 Suivant
                                                 <ChevronRight className="h-4 w-4" />
