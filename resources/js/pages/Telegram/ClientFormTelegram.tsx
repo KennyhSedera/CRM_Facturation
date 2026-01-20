@@ -9,7 +9,6 @@ interface FormData {
     client_name: string;
     client_email: string;
     client_phone?: string;
-    client_cin?: string;
     client_adress?: string;
 }
 
@@ -17,7 +16,6 @@ interface FormErrors {
     client_name?: string;
     client_email?: string;
     client_phone?: string;
-    client_cin?: string;
     client_adress?: string;
 }
 
@@ -26,7 +24,6 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
         client_name: '',
         client_email: '',
         client_phone: '',
-        client_cin: '',
         client_adress: '',
     });
 
@@ -284,31 +281,6 @@ export default function ClientFormTelegram({ telegram_id }: ClientFormTelegramPr
                             {errors.client_phone && (
                                 <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
                                     <span>⚠️</span> {errors.client_phone}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label htmlFor="client_cin" className="mb-2 block text-sm font-semibold">
-                                CIN du client
-                            </label>
-                            <input
-                                type="text"
-                                id="client_cin"
-                                name="client_cin"
-                                value={formData.client_cin}
-                                onChange={handleChange}
-                                placeholder="Ex: 1 23 456 789"
-                                className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 transition-all focus:border-blue-500"
-                                style={{
-                                    backgroundColor: tg?.themeParams?.secondary_bg_color || '#f5f5f5',
-                                    color: tg?.themeParams?.text_color || '#000000',
-                                }}
-                                disabled={isLoading}
-                            />
-                            {errors.client_cin && (
-                                <p className="mt-1 flex items-center gap-1 text-sm text-red-500">
-                                    <span>⚠️</span> {errors.client_cin}
                                 </p>
                             )}
                         </div>

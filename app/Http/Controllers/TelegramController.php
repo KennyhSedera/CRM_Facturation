@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
@@ -166,12 +167,21 @@ class TelegramController extends Controller
         if ($user) {
             $userId = $user->id;
         }
-
         $validator = Validator::make($request->all(), [
-            'client_name' => 'required|string|max:255|unique:clients,client_name',
-            'client_email' => 'required|email|unique:clients,client_email',
+            'client_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('clients', 'client_name')
+                    ->where('company_id', $user->company_id)
+            ],
+            'client_email' => [
+                'required',
+                'email',
+                Rule::unique('clients', 'client_email')
+                    ->where('company_id', $user->company_id)
+            ],
             'client_phone' => 'nullable|string|max:20',
-            'client_cin' => 'nullable|string|max:20',
             'client_adress' => 'nullable|string|max:255',
         ], [
             'client_name.required' => 'Le nom du client est requis',
@@ -185,9 +195,6 @@ class TelegramController extends Controller
 
             'client_phone.string' => 'Le téléphone doit être une chaîne de caractères',
             'client_phone.max' => 'Le téléphone ne peut pas dépasser 20 caractères',
-
-            'client_cin.string' => 'Le CIN doit être une chaîne de caractères',
-            'client_cin.max' => 'Le CIN ne peut pas dépasser 20 caractères',
 
             'client_adress.string' => 'L\'adresse doit être une chaîne de caractères',
             'client_adress.max' => 'L\'adresse ne peut pas dépasser 255 caractères',
